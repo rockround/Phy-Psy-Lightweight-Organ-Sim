@@ -5,7 +5,6 @@ using System.Windows.Forms;
 namespace OrganDesigner
 {
     /// <summary>
-    /// TODO : Make this more predictable/ Make stopping it easier. Confirm organ functionality. Make UI better on confirmation
     /// </summary>
     /// IDX ORDERING: WCMSBPV
     public partial class DesignerModule : Form
