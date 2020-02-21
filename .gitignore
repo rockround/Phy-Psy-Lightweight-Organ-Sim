@@ -4,3 +4,10 @@ OrganDesigner/.vs/OrganDesigner/v15/Server/sqlite3/storage.ide-shm
 OrganDesigner/.vs/OrganDesigner/v15/Server/sqlite3/storage.ide-wal
 OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.csproj.CoreCompileInputs.cache
 OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.csprojAssemblyReference.cache
+OrganDesigner/OrganDesigner/bin/Debug/OrganDesigner.exe
+*.ide-wal
+*.pdb
+OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.csproj.FileListAbsolute.txt
+OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.csproj.GenerateResource.cache
+OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.pdb
+OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.exe

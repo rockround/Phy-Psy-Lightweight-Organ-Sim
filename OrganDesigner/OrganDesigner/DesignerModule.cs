@@ -59,7 +59,7 @@ namespace OrganDesigner
                     break;
                 MethodInvoker mi = delegate ()
                 {
-
+                    HeartRate.Text = s.curBps + "";
                     for (int i = 0; i < s.organs.Length; i++)
                     {
                         if (s.organs[i].coreM + s.organs[i].dynamicM > 0)

@@ -8,3 +8,13 @@ C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\Orga
 C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.exe
 C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.pdb
 C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.DesignerModule.resources
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\bin\Debug\OrganDesigner.exe.config
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\bin\Debug\OrganDesigner.exe
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\bin\Debug\OrganDesigner.pdb
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.csprojAssemblyReference.cache
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.DesignerModule.resources
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.Properties.Resources.resources
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.csproj.GenerateResource.cache
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.csproj.CoreCompileInputs.cache
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.exe
+C:\Users\zachi\OneDrive\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.pdb

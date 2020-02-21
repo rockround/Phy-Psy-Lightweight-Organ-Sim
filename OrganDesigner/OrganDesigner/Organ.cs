@@ -55,24 +55,25 @@ namespace OrganDesigner
             //how much actually is released
             Vector3 netMTP = outMTP * healthiness;
 
-            float phononsReleased = 0;
+            //float phononsReleased = 0;
             float psionsReleased = 0;
 
-            if (coreM + dynamicM > 0)
+            /*if (coreM + dynamicM > 0)
             {
                 phononsReleased = getTemperature() * netMTP.X;
-            }
+            }*/
             if (coreM > 0)
             {
                 psionsReleased = psionLevel / coreM * netMTP.X;
             }
 
-            tKe -= phononsReleased;
+            //Handled in matter absorption step
+            //tKe -= phononsReleased;
             psionLevel -= psionsReleased;
 
             Vector3 remainingToFlow = toProcessMTP * healthiness;
 
-            outMTP += new Vector3(0, phononsReleased, psionsReleased);
+            outMTP += new Vector3(0, 0/*phononsReleased*/, psionsReleased);
 
             parent.inMTP += netMTP + remainingToFlow;
 
@@ -88,14 +89,24 @@ namespace OrganDesigner
             {
 
                 deltaMTP = minM / toProcessMTP.X * toProcessMTP;
+                //Psions distribute by mass evenly (Like charge)
                 psionLevel += deltaMTP.Z;
-                tKe += deltaMTP.Y;
+
+                //Calculate total diffusion of blood and organ regardless of how much blood is used
+                float finalTemp = (tKe + deltaMTP.Y)/(coreM + dynamicM + deltaMTP.X);
+                
                 toProcessMTP -= deltaMTP;
                 deltaMTP = new Vector3(deltaMTP.X, 0, 0);
-                float usedM = Math.Min(deltaMTP.X, startHealth - (coreM + dynamicM));//if health below normal, get minimum of health needed, available matter, and regeneration
+                
+                float availableM = deltaMTP.X;
+                float usedM = Math.Min(availableM, startHealth - (coreM + dynamicM));//if health below normal, get minimum of health needed, available matter, and regeneration
                 dynamicM += usedM;
-                Vector3 incorporated = deltaMTP * usedM / deltaMTP.X;
+                tKe = finalTemp * (coreM + dynamicM);
+
+                Vector3 incorporated = deltaMTP * usedM / availableM;
                 deltaMTP -= incorporated;
+                //this many phonons end up going back out after absorption
+                deltaMTP.Y = deltaMTP.X * finalTemp;
 
             }
 
@@ -232,11 +243,26 @@ namespace OrganDesigner
         public override void absorb()
         {
             float minM = Math.Min(metabolism, toProcessMTP.X);
-            Vector3 deltaMTP = (minM == 0 ? 0 : minM / toProcessMTP.X) * toProcessMTP;
-            float rawPsions = deltaMTP.Z;
-            addPhonons(deltaMTP.Y);
-            toProcessMTP -= deltaMTP;
-            deltaMTP = new Vector3(deltaMTP.X, 0, 0);
+            //Console.WriteLine(minM);
+            Vector3 deltaMTP = Vector3.Zero;
+            float rawPsions = 0;
+            float finalTemp = getTemperature();
+            if (minM > 0)
+            {
+                deltaMTP = (minM / toProcessMTP.X) * toProcessMTP;
+                rawPsions = deltaMTP.Z;
+
+
+                //Calculate total diffusion of blood and organ regardless of how much blood is used
+                finalTemp = (tKe + deltaMTP.Y ) / (coreM + dynamicM + deltaMTP.X);
+
+                toProcessMTP -= deltaMTP;
+                deltaMTP = new Vector3(deltaMTP.X, 0, 0);
+            }
+
+
+
+            //addPhonons(deltaMTP.Y);
 
 
             //Console.WriteLine(toProcessMTP + " " + deltaMTP.X);
@@ -372,6 +398,13 @@ namespace OrganDesigner
 
             //Console.WriteLine("LESS THAN ENOUGH BY " + (totalDemand - Math.Round(toProcessMTP.X + outMTP.X + deltaMTP.X, 3)));
             //Console.WriteLine(deltaMTP);
+
+
+            tKe = finalTemp * (coreM + dynamicM);
+            //this many phonons end up going back out after absorption
+            deltaMTP.Y = deltaMTP.X * finalTemp;
+
+
             outMTP += deltaMTP;
 
             healthiness = (dynamicM + coreM) / startHealth;
@@ -455,12 +488,12 @@ namespace OrganDesigner
 
             //reason to not have psionDemand: Since distribution is already happening via matter diffusion on matter mtp exchange, it is unnecessary and also unnatural. This would give double edged blade effect for increasing blood flow
 
-            float phononsReleased = getTemperature() * outMTP.X;
+            //float phononsReleased = getTemperature() * outMTP.X;
             float psionsReleased = psionLevel / coreM * outMTP.X;
-            addPhonons(-phononsReleased);
+            //addPhonons(-phononsReleased);
             psionLevel -= psionsReleased;
             //print(psionsReleased);
-            outMTP += new Vector3(0, phononsReleased, psionsReleased) + toProcessMTP;
+            outMTP += new Vector3(0, 0/*phononsReleased*/, psionsReleased) + toProcessMTP;
 
             c.inMTP = outMTP * cD;
             w.inMTP = outMTP * wD;
@@ -519,6 +552,7 @@ namespace OrganDesigner
                         m.absorb();
                         p.absorb();
                         absorb();
+                        //Console.WriteLine(v.getTemperature() + " " + b.getTemperature() + " " + c.getTemperature() + " " + w.getTemperature() + " " + m.getTemperature() + " " + p.getTemperature() + " " + getTemperature());
 
                         v.continuousOut();
                         b.continuousOut();
@@ -561,11 +595,14 @@ namespace OrganDesigner
         {
             float minM = Math.Min(metabolism, toProcessMTP.X);
             Vector3 deltaMTP = Vector3.Zero;
+            float finalTemp = getTemperature();
             if (minM > 0)
             {
                 deltaMTP = minM / toProcessMTP.X * toProcessMTP;
                 psionLevel += deltaMTP.Z;
-                tKe += deltaMTP.Y;
+                finalTemp = (tKe + deltaMTP.Y) / (coreM + dynamicM + deltaMTP.X);
+
+                //tKe += deltaMTP.Y;
                 toProcessMTP -= deltaMTP;
                 deltaMTP = new Vector3(deltaMTP.X, 0, 0);
             }
@@ -579,7 +616,10 @@ namespace OrganDesigner
                 Vector3 incorporated = deltaMTP * usedM / deltaMTP.X;
                 deltaMTP -= incorporated;
 
+                tKe = finalTemp * (coreM + dynamicM);
 
+                //this many phonons end up going back out after absorption
+                deltaMTP.Y = deltaMTP.X * finalTemp;
             }
             healthiness = (dynamicM + coreM) / startHealth;
 
@@ -616,12 +656,14 @@ namespace OrganDesigner
         {
             float minM = Math.Min(metabolism, toProcessMTP.X);
             Vector3 deltaMTP = Vector3.Zero;
+            float finalTemp = getTemperature();
             if (minM > 0)
             {
 
                 deltaMTP = minM / toProcessMTP.X * toProcessMTP;
                 psionLevel += deltaMTP.Z;
-                tKe += deltaMTP.Y;
+                //tKe += deltaMTP.Y;
+                finalTemp = (tKe + deltaMTP.Y ) / (coreM + dynamicM + deltaMTP.X);
 
                 toProcessMTP -= deltaMTP;
                 deltaMTP = new Vector3(deltaMTP.X, 0, 0);
@@ -630,6 +672,11 @@ namespace OrganDesigner
                 dynamicM += usedM;
                 Vector3 incorporated = deltaMTP * usedM / deltaMTP.X;
                 deltaMTP -= incorporated;
+
+                tKe = finalTemp * (coreM + dynamicM);
+
+                //this many phonons end up going back out after absorption
+                deltaMTP.Y = deltaMTP.X * finalTemp;
 
             }
             healthiness = (dynamicM + coreM) / startHealth;
@@ -758,11 +805,14 @@ namespace OrganDesigner
             float minM = Math.Min(metabolism, toProcessMTP.X);
             Vector3 deltaMTP = Vector3.Zero;
             float rawPsions = 0;
+            float finalTemp;
             if (minM > 0)
             {
                 deltaMTP = minM / toProcessMTP.X * toProcessMTP;
                 rawPsions = deltaMTP.Z;
-                tKe += deltaMTP.Y;
+                //tKe += deltaMTP.Y;
+                finalTemp = (tKe + deltaMTP.Y ) / (coreM + dynamicM + deltaMTP.X);
+
                 toProcessMTP -= deltaMTP;
                 deltaMTP = new Vector3(deltaMTP.X, 0, 0);
 
@@ -770,6 +820,11 @@ namespace OrganDesigner
                 dynamicM += usedM;
                 Vector3 incorporated = deltaMTP * usedM / deltaMTP.X;
                 deltaMTP -= incorporated;
+
+                tKe = finalTemp * (coreM + dynamicM);
+
+                //this many phonons end up going back out after absorption
+                deltaMTP.Y = deltaMTP.X * finalTemp;
             }
 
             if (usePsions)
