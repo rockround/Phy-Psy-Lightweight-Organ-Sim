@@ -1,0 +1,10 @@
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\bin\Debug\OrganDesigner.exe.config
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\bin\Debug\OrganDesigner.exe
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\bin\Debug\OrganDesigner.pdb
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.csprojAssemblyReference.cache
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.Properties.Resources.resources
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.csproj.GenerateResource.cache
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.csproj.CoreCompileInputs.cache
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.exe
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.pdb
+C:\Users\Tomoishi Kimaru\source\repos\OrganDesigner\OrganDesigner\obj\Debug\OrganDesigner.DesignerModule.resources
