@@ -26,6 +26,7 @@ namespace OrganDesigner
         float baseBps = 1;
         float homeostasis = 1;
         ProgressBar[] cores, powers, temps, charges;
+        bool isFlat = true;
         public DesignerModule()
         {
             InitializeComponent();
@@ -41,10 +42,59 @@ namespace OrganDesigner
             //passing it a method to be run on the new thread.
         }
 
+        public void mainLoopFlat(float simRate)
+        {
+            FlatOrganSystem s = new FlatOrganSystem(startHealths, metabolisms, powerConsumptions, maxMs, maxCharges, maxBoostCount, betaRate, drainRate, fatGrowth, fatBreakdown, baseBps, homeostasis);
+
+            foreach (var number in s.Discrete())
+            {
+                while (pause)
+                {
+                    Thread.Sleep(50);
+                }
+                Console.WriteLine(s.coreM[FlatOrganSystem.sI] + " " + s.dynamicM[FlatOrganSystem.sI]);
+                if (stop)
+                    break;
+                MethodInvoker mi = delegate ()
+                {
+                    HeartRate.Text = s.curBps + "";
+                    for (int i = 0; i < s.coreM.Length; i++)
+                    {
+                        if (s.coreM[i] + s.dynamicM[i] > 0)
+                        {
+                            cores[i].Value = (int)(100 * s.coreM[i] / s.startHealth[i]);
+                            powers[i].Value = (int)(100 * s.currentPower[i]);
+                            temps[i].Value = Math.Min(100, (int)(s.getTemperature(i)));
+                            if (i <= Organ.lastChargeableOrgan)
+                            {
+                                charges[i].Value = (int)(100 * s.charge[i] / s.maxCharge[i]);
+                            }
+                        }
+                        else
+                        {
+                            cores[i].Value = 0;
+                            powers[i].Value = 0;
+                            temps[i].Value = 0;
+                            if (i <= Organ.lastChargeableOrgan)
+                            {
+                                charges[i].Value = 0;
+                            }
+
+                        }
+
+                    }
+
+
+                };
+                this.Invoke(mi);
+                Thread.Sleep((int)(number * 1000 * 1 / simRate));
+
+                //To keep stuff from jamming up
+            }
+
+        }
         public void mainLoop(float simRate)
         {
-            Structure system = new Structure(startHealths, metabolisms, powerConsumptions, maxMs, maxCharges, maxBoostCount, betaRate, drainRate, fatGrowth, fatBreakdown, baseBps, homeostasis);
-
             //you need to use Invoke because the new thread can't access the UI elements directly
             s = new Structure(startHealths, metabolisms, powerConsumptions, maxMs, maxCharges, maxBoostCount, betaRate, drainRate, fatGrowth, fatBreakdown, baseBps, homeostasis);
             s.startSimulation();
@@ -124,7 +174,14 @@ namespace OrganDesigner
             }
             pause = false;
             stop = false;
-            t = new Thread(() => mainLoop((float)SimRate.Value));
+            if (isFlat)
+            {
+                t = new Thread(() => mainLoopFlat((float)SimRate.Value));
+            }
+            else
+            {
+                t = new Thread(() => mainLoop((float)SimRate.Value));
+            }
             t.Start();
             PauseButton.Enabled = true;
             PlayButton.Enabled = false;
