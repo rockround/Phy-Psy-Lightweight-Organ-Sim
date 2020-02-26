@@ -81,6 +81,7 @@ namespace OrganDesigner
             for(int i = 0; i < startHealths.Length; i++)
             {
                 coreM[i] = startHealths[i];
+                tKe[i] = EnergyManager.roomTemp * coreM[i];
             }
             charge = new float[maxCharges.Length];
             maxCharge = maxCharges;
@@ -432,7 +433,7 @@ namespace OrganDesigner
                             toProcessMTP[vI] -= deltaMTPv;
                             deltaMTPv = new Vector3(deltaMTPv.X, 0, 0);
                             float availableM = deltaMTPv.X;
-                            float usedM = Math.Min(availableM, startHealth[mI] - (coreM[vI] + dynamicM[vI]));//if health below normal, get minimum of health needed, available matter, and regeneration
+                            float usedM = Math.Min(availableM, startHealth[vI] - (coreM[vI] + dynamicM[vI]));//if health below normal, get minimum of health needed, available matter, and regeneration
                             dynamicM[vI] += usedM;
                             tKe[vI] = finalTemp * (coreM[vI] + dynamicM[vI]);
                             Vector3 incorporated = deltaMTPv * usedM / availableM;
@@ -458,7 +459,7 @@ namespace OrganDesigner
                         bruise(0, startHealth[bI] * contaminationRate, bI);//damaged with contamination (at end because this is cobered up by inM in flowing
                         if (minMb > 0)
                         {
-                            float usedM = Math.Min(deltaMTPb.X, startHealth[mI] - (coreM[bI] + dynamicM[bI]));//if health below normal, get minimum of health needed, abailable matter, and regeneration
+                            float usedM = Math.Min(deltaMTPb.X, startHealth[bI] - (coreM[bI] + dynamicM[bI]));//if health below normal, get minimum of health needed, abailable matter, and regeneration
                             dynamicM[bI] += usedM;
                             tKe[bI] = finalTempB * (coreM[bI] + dynamicM[bI]);
                             Vector3 incorporated = deltaMTPb * usedM / deltaMTPb.X;
@@ -479,7 +480,7 @@ namespace OrganDesigner
                             float finalTemp = (tKe[cI] + deltaMTPc.Y) / (coreM[cI] + dynamicM[cI] + deltaMTPc.X);
                             toProcessMTP[cI] -= deltaMTPc;
                             deltaMTPc = new Vector3(deltaMTPc.X, 0, 0);
-                            float usedM = Math.Min(deltaMTPc.X, startHealth[mI] - (coreM[cI] + dynamicM[cI]));//if health below normal, get minimum of health needed, available matter, and regeneration
+                            float usedM = Math.Min(deltaMTPc.X, startHealth[cI] - (coreM[cI] + dynamicM[cI]));//if health below normal, get minimum of health needed, available matter, and regeneration
                             dynamicM[cI] += usedM;
                             tKe[cI] = finalTemp * (coreM[cI] + dynamicM[cI]);
                             Vector3 incorporated = deltaMTPc * usedM / deltaMTPc.X;
@@ -492,16 +493,16 @@ namespace OrganDesigner
 
                         //this is w.absorb()
                         float rawPsions = 0;
-                        float minMw = Math.Min(metabolism[cI], toProcessMTP[cI].X);
+                        float minMw = Math.Min(metabolism[wI], toProcessMTP[wI].X);
                         Vector3 deltaMTPw = Vector3.Zero;
                         if (minMw > 0)
                         {
-                            deltaMTPw = minMw / toProcessMTP[cI].X * toProcessMTP[cI];
+                            deltaMTPw = minMw / toProcessMTP[wI].X * toProcessMTP[wI];
                             psionLevel[wI] += deltaMTPw.Z;
                             float finalTemp = (tKe[wI] + deltaMTPw.Y) / (coreM[wI] + dynamicM[wI] + deltaMTPw.X);
                             toProcessMTP[wI] -= deltaMTPw;
                             deltaMTPw = new Vector3(deltaMTPw.X, 0, 0);
-                            float usedM = Math.Min(deltaMTPw.X, startHealth[mI] - (coreM[wI] + dynamicM[wI]));//if health below normal, get minimum of health needed, awailable matter, and regeneration
+                            float usedM = Math.Min(deltaMTPw.X, startHealth[wI] - (coreM[wI] + dynamicM[wI]));//if health below normal, get minimum of health needed, awailable matter, and regeneration
                             dynamicM[wI] += usedM;
                             tKe[wI] = finalTemp * (coreM[wI] + dynamicM[wI]);
                             Vector3 incorporated = deltaMTPw * usedM / deltaMTPw.X;
@@ -549,7 +550,7 @@ namespace OrganDesigner
                             toProcessMTP[pI] -= deltaMTPp;
                             deltaMTPp = new Vector3(deltaMTPp.X, 0, 0);
                             float apailableM = deltaMTPp.X;
-                            float usedM = Math.Min(apailableM, startHealth[mI] - (coreM[pI] + dynamicM[pI]));//if health below normal, get minimum of health needed, apailable matter, and regeneration
+                            float usedM = Math.Min(apailableM, startHealth[pI] - (coreM[pI] + dynamicM[pI]));//if health below normal, get minimum of health needed, apailable matter, and regeneration
                             dynamicM[pI] += usedM;
                             tKe[pI] = finalTemp * (coreM[pI] + dynamicM[pI]);
                             Vector3 incorporated = deltaMTPp * usedM / apailableM;
@@ -557,7 +558,7 @@ namespace OrganDesigner
                             deltaMTPp.Y = deltaMTPp.X * finalTemp;
                         }
                         healthiness[pI] = (dynamicM[pI] + coreM[pI]) / startHealth[pI];
-                        float toCpt = drain * currentPower[pI];
+                        float toCpt =  Math.Min(stomachM,drain) * currentPower[pI];
                         stomachM -= toCpt;
                         dynamicM[sI] += toCpt;
                         float realP = toCpt * EnergyManager.psionPerKg;
@@ -634,19 +635,19 @@ namespace OrganDesigner
 
 
                     //this is b.flowOut
-                    Vector3 netMTPb = outMTP[vI] * healthiness[vI];
+                    Vector3 netMTPb = outMTP[bI] * healthiness[bI];
                     float psionsReleasedb = 0;
-                    if (coreM[vI] > 0)
+                    if (coreM[bI] > 0)
                     {
-                        psionsReleasedb = psionLevel[vI] / coreM[vI] * netMTPb.X;
+                        psionsReleasedb = psionLevel[bI] / coreM[bI] * netMTPb.X;
                     }
-                    psionLevel[vI] -= psionsReleasedb;
-                    Vector3 remainingToFlowb = toProcessMTP[vI] * healthiness[vI];
-                    outMTP[vI] += new Vector3(0, 0, psionsReleasedb);
+                    psionLevel[bI] -= psionsReleasedb;
+                    Vector3 remainingToFlowb = toProcessMTP[bI] * healthiness[bI];
+                    outMTP[bI] += new Vector3(0, 0, psionsReleasedb);
                     inMTP[sI] += netMTPb + remainingToFlowb;
-                    stomachM += outMTP[vI].X - netMTPb.X + toProcessMTP[vI].X - remainingToFlowb.X;   
-                    psionLevel[sI] += outMTP[vI].Z - netMTPb.Z + toProcessMTP[vI].Z - remainingToFlowb.Z;
-                    tKe[sI] += (outMTP[vI].Y - netMTPb.Y + toProcessMTP[vI].Y - remainingToFlowb.Y);
+                    stomachM += outMTP[bI].X - netMTPb.X + toProcessMTP[bI].X - remainingToFlowb.X;   
+                    psionLevel[sI] += outMTP[bI].Z - netMTPb.Z + toProcessMTP[bI].Z - remainingToFlowb.Z;
+                    tKe[sI] += (outMTP[bI].Y - netMTPb.Y + toProcessMTP[bI].Y - remainingToFlowb.Y);
 
 
 
@@ -718,13 +719,15 @@ namespace OrganDesigner
                     float psionsReleaseds = psionLevel[sI] / coreM[sI] * outMTP[sI].X;
                     psionLevel[sI] -= psionsReleaseds;
                     outMTP[sI] += new Vector3(0, 0, psionsReleaseds) + toProcessMTP[sI];
-                    inMTP[cI] = outMTP[cI] * cDP;
-                    inMTP[wI] = outMTP[wI] * wDP;
-                    inMTP[mI] = outMTP[mI] * mDP;
-                    inMTP[vI] = outMTP[vI] * vDP;
-                    inMTP[pI] = outMTP[pI] * pDP;
-                    inMTP[bI] = outMTP[bI] * bDP;
+                    inMTP[cI] = outMTP[sI] * cDP;
+                    inMTP[wI] = outMTP[sI] * wDP;
+                    inMTP[mI] = outMTP[sI] * mDP;
+                    inMTP[vI] = outMTP[sI] * vDP;
+                    inMTP[pI] = outMTP[sI] * pDP;
+                    inMTP[bI] = outMTP[sI] * bDP;
                     inMTP[sI] += outMTP[sI] * sDP;
+
+                    //Console.WriteLine(inMTP[sI] + " " + inMTP[bI] + " " + inMTP[pI]);
 
                 }
                 yield return .01f;

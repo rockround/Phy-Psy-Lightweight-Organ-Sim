@@ -26,7 +26,7 @@ namespace OrganDesigner
         float baseBps = 1;
         float homeostasis = 1;
         ProgressBar[] cores, powers, temps, charges;
-        bool isFlat = true;
+        bool isFlat = false;
         public DesignerModule()
         {
             InitializeComponent();
@@ -152,7 +152,7 @@ namespace OrganDesigner
             pause = false;
             stop = true;
             PauseButton.Enabled = PlayButton.Enabled = false;
-            for (int i = 0; i < s.organs.Length; i++)
+            for (int i = 0; i < 7; i++)
             {
                 cores[i].Value = 0;
                 powers[i].Value = 0;
