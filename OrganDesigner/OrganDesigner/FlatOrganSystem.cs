@@ -58,7 +58,8 @@ namespace OrganDesigner
         float sDE, pDE, mDE, vDE, wDE, totalDemandE;
 
         //Initializes organ system
-        public FlatOrganSystem(float[] startHealths, float[] metabolisms, float[] powerConsumptions, float[] maxMs, float[] maxCharges, int maxBoostCount, float betaRate, float drainRate, float fatGrowth, float fatBreakdown, float baseBps, float homeostasis)         {
+        public FlatOrganSystem(float[] startHealths, float[] metabolisms, float[] powerConsumptions, float[] maxMs, float[] maxCharges, int maxBoostCount, float betaRate, float drainRate, float fatGrowth, float fatBreakdown, float baseBps, float homeostasis)
+        {
             maxM = maxMs;
             startHealth = startHealths;
             pC = powerConsumptions;
@@ -78,7 +79,7 @@ namespace OrganDesigner
             outMTP = new Vector3[startHealth.Length];
             toProcessMTP = new Vector3[startHealth.Length];
             coreM = new float[startHealths.Length];
-            for(int i = 0; i < startHealths.Length; i++)
+            for (int i = 0; i < startHealths.Length; i++)
             {
                 coreM[i] = startHealths[i];
                 tKe[i] = EnergyManager.roomTemp * coreM[i];
@@ -109,28 +110,28 @@ namespace OrganDesigner
             }
             if (Math.Round(toProcessMTP[sI].X + outMTP[sI].X + deltaMTP.X, 3) < totalDemandP)//if blood flow is too low, add directly to output deposit from dynamicM[sI]
             {
-                    float delta = Math.Min(totalDemandP - (outMTP[sI].X + toProcessMTP[sI].X + deltaMTP.X), metabolism[sI]);//get minimum of deficit and what can be offered via metabolism[sI]
-                    if (dynamicM[sI] > delta)//if enough dynamic, pull from dynamic
+                float delta = Math.Min(totalDemandP - (outMTP[sI].X + toProcessMTP[sI].X + deltaMTP.X), metabolism[sI]);//get minimum of deficit and what can be offered via metabolism[sI]
+                if (dynamicM[sI] > delta)//if enough dynamic, pull from dynamic
+                {
+                    dynamicM[sI] -= delta;
+                    deltaMTP.X += delta;
+                }
+                else
+                {
+                    if (coreM[sI] + dynamicM[sI] > delta)//starve
                     {
-                        dynamicM[sI] -= delta;
                         deltaMTP.X += delta;
+                        float deltaHealth = delta - dynamicM[sI];
+                        psionLevel[sI] += crystalPsions * deltaHealth / coreM[sI]; //add to body psions from crystal proportional to percent of matter lost
+                        crystalPsions *= 1 - deltaHealth / coreM[sI];// subtract percent of psions lost due to matter loss
+                        coreM[sI] -= deltaHealth;
+                        dynamicM[sI] = 0;
                     }
                     else
                     {
-                        if (coreM[sI] + dynamicM[sI] > delta)//starve
-                        {
-                            deltaMTP.X += delta;
-                            float deltaHealth = delta - dynamicM[sI];
-                            psionLevel[sI] += crystalPsions * deltaHealth / coreM[sI]; //add to body psions from crystal proportional to percent of matter lost
-                            crystalPsions *= 1 - deltaHealth / coreM[sI];// subtract percent of psions lost due to matter loss
-                            coreM[sI] -= deltaHealth;
-                            dynamicM[sI] = 0;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Death by Starvation");
-                        }
+                        Console.WriteLine("Death by Starvation");
                     }
+                }
             }
             else//care about self after caring for other organs
             {
@@ -180,19 +181,19 @@ namespace OrganDesigner
             }
             float crystalCap = coreM[sI] * EnergyManager.psionPerKg;
 
-                if (crystalPsions < crystalCap)//if crystal not yet fill
-                {
-                    float delta = Math.Min(rawPsions, crystalCap - crystalPsions);
-                    crystalPsions += delta;
-                    rawPsions -= delta;
-                    psionLevel[sI] += rawPsions;
-                    rawPsions = 0;
-                }
-                else
-                {
-                    psionLevel[sI] += rawPsions;
-                    rawPsions = 0;
-                }
+            if (crystalPsions < crystalCap)//if crystal not yet fill
+            {
+                float delta = Math.Min(rawPsions, crystalCap - crystalPsions);
+                crystalPsions += delta;
+                rawPsions -= delta;
+                psionLevel[sI] += rawPsions;
+                rawPsions = 0;
+            }
+            else
+            {
+                psionLevel[sI] += rawPsions;
+                rawPsions = 0;
+            }
             tKe[sI] = finalTemp * (coreM[sI] + dynamicM[sI]);
             deltaMTP.Y = deltaMTP.X * finalTemp;
             outMTP[sI] += deltaMTP;
@@ -226,7 +227,7 @@ namespace OrganDesigner
                     Console.WriteLine("Total loss of functional organ");
                 }
                 else
-                    bruise(0, leftOverCore,sI, chunk);
+                    bruise(0, leftOverCore, sI, chunk);
             }
             if (coreM[idx] + dynamicM[idx] == 0)
             {
@@ -243,7 +244,7 @@ namespace OrganDesigner
         }
         internal float getTemperature(int idx)
         {
-            if(idx == sI)
+            if (idx == sI)
                 return tKe[idx] / (coreM[idx] + dynamicM[idx] + stomachM + fatM);
             else
                 return tKe[idx] / (coreM[idx] + dynamicM[idx]);
@@ -254,7 +255,7 @@ namespace OrganDesigner
             get
             {
 
-                float realBps = (float)Math.Round(baseBps * getTemperature(sI) / EnergyManager.roomTemp * currentPower[sI]* healthiness[sI], 3);
+                float realBps = (float)Math.Round(baseBps * getTemperature(sI) / EnergyManager.roomTemp * currentPower[sI] * healthiness[sI], 3);
                 //Console.WriteLine(temperature + " " + currentPower + " " + healthiness);
                 if (float.IsInfinity(realBps) || float.IsNaN(realBps))
                 {
@@ -295,7 +296,6 @@ namespace OrganDesigner
             }
         }
 
- 
         internal IEnumerable<float> Discrete()
         {
 
@@ -326,30 +326,19 @@ namespace OrganDesigner
 
                 //this is s.flowIn()
                 toProcessMTP[sI] = inMTP[sI];
-                outMTP[sI] = inMTP[sI] = Vector3.Zero;
-
-                //this is v.flowIn()
                 toProcessMTP[vI] = inMTP[vI];
-                outMTP[vI] = inMTP[vI] = Vector3.Zero;
-
-                //this is b.flowIn()
                 toProcessMTP[bI] = inMTP[bI];
-                outMTP[bI] = inMTP[bI] = Vector3.Zero;
-
-                //this is c.flowIn()
                 toProcessMTP[cI] = inMTP[cI];
-                outMTP[cI] = inMTP[cI] = Vector3.Zero;
-
-                //this is w.flowIn()
                 toProcessMTP[wI] = inMTP[wI];
-                outMTP[wI] = inMTP[wI] = Vector3.Zero;
-
-                //this is m.flowIn()
                 toProcessMTP[mI] = inMTP[mI];
-                outMTP[mI] = inMTP[mI] = Vector3.Zero;
-
-                //this is p.flowIn()
                 toProcessMTP[pI] = inMTP[pI];
+              
+                outMTP[sI] = inMTP[sI] = Vector3.Zero;
+                outMTP[vI] = inMTP[vI] = Vector3.Zero;
+                outMTP[bI] = inMTP[bI] = Vector3.Zero;
+                outMTP[cI] = inMTP[cI] = Vector3.Zero;
+                outMTP[wI] = inMTP[wI] = Vector3.Zero;
+                outMTP[mI] = inMTP[mI] = Vector3.Zero;
                 outMTP[pI] = inMTP[pI] = Vector3.Zero;
 
                 if (time >= 1 / curBps)
@@ -542,7 +531,7 @@ namespace OrganDesigner
                             deltaMTPp.Y = deltaMTPp.X * finalTemp;
                         }
                         healthiness[pI] = (dynamicM[pI] + coreM[pI]) / startHealth[pI];
-                        float toCpt =  Math.Min(stomachM,drain) * currentPower[pI];
+                        float toCpt = Math.Min(stomachM, drain) * currentPower[pI];
                         stomachM -= toCpt;
                         dynamicM[sI] += toCpt;
                         float realP = toCpt * EnergyManager.psionPerKg;
@@ -602,108 +591,84 @@ namespace OrganDesigner
                         yield return .05f;
                     }
 
-                    //this is v.flowOut
-                    Vector3 netMTPv = outMTP[vI] * healthiness[vI];
-                    Vector3 netMTPb = outMTP[bI] * healthiness[bI];
-                    Vector3 netMTPc = outMTP[cI] * healthiness[cI];
-                    Vector3 netMTPw = outMTP[wI] * healthiness[wI];
-                    Vector3 netMTPm = outMTP[mI] * healthiness[mI];
-                    Vector3 netMTPp = outMTP[pI] * healthiness[pI];
+
                     float psionsReleasedv = 0;
                     float psionsReleasedb = 0;
                     float psionsReleasedc = 0;
                     float psionsReleasedw = 0;
                     float psionsReleasedm = 0;
                     float psionsReleasedp = 0;
+                    float psionsReleaseds = psionLevel[sI] / coreM[sI] * outMTP[sI].X;
 
                     if (coreM[vI] > 0)
                     {
-                        psionsReleasedv = psionLevel[vI] / coreM[vI] * netMTPv.X;
+                        psionsReleasedv = psionLevel[vI] / coreM[vI] * outMTP[vI].X * healthiness[vI];
                     }
-                    psionLevel[vI] -= psionsReleasedv;
-                    Vector3 remainingToFlowv = toProcessMTP[vI] * healthiness[vI];
-                    outMTP[vI] += new Vector3(0, 0, psionsReleasedv);
-                    inMTP[sI] += netMTPv + remainingToFlowv;
-                    stomachM += outMTP[vI].X - netMTPv.X + toProcessMTP[vI].X - remainingToFlowv.X;     
-                    psionLevel[sI] += outMTP[vI].Z - netMTPv.Z + toProcessMTP[vI].Z - remainingToFlowv.Z;
-                    tKe[sI] += (outMTP[vI].Y - netMTPv.Y + toProcessMTP[vI].Y - remainingToFlowv.Y);
-
-
-                    //this is b.flowOut
                     if (coreM[bI] > 0)
                     {
-                        psionsReleasedb = psionLevel[bI] / coreM[bI] * netMTPb.X;
+                        psionsReleasedb = psionLevel[bI] / coreM[bI] * outMTP[bI].X * healthiness[bI];
                     }
-                    psionLevel[bI] -= psionsReleasedb;
-                    Vector3 remainingToFlowb = toProcessMTP[bI] * healthiness[bI];
-                    outMTP[bI] += new Vector3(0, 0, psionsReleasedb);
-                    inMTP[sI] += netMTPb + remainingToFlowb;
-                    stomachM += outMTP[bI].X - netMTPb.X + toProcessMTP[bI].X - remainingToFlowb.X;   
-                    psionLevel[sI] += outMTP[bI].Z - netMTPb.Z + toProcessMTP[bI].Z - remainingToFlowb.Z;
-                    tKe[sI] += (outMTP[bI].Y - netMTPb.Y + toProcessMTP[bI].Y - remainingToFlowb.Y);
-
-
-
-                    //this is c.flowOut
                     if (coreM[cI] > 0)
                     {
-                        psionsReleasedc = psionLevel[cI] / coreM[cI] * netMTPc.X;
+                        psionsReleasedc = psionLevel[cI] / coreM[cI] * outMTP[cI].X * healthiness[cI];
                     }
-                    psionLevel[cI] -= psionsReleasedc;
-                    Vector3 remainingToFlowc = toProcessMTP[cI] * healthiness[cI];
-                    outMTP[cI] += new Vector3(0, 0, psionsReleasedc);
-                    inMTP[sI] += netMTPc + remainingToFlowc;
-                    stomachM += outMTP[cI].X - netMTPc.X + toProcessMTP[cI].X - remainingToFlowc.X;   
-                    psionLevel[sI] += outMTP[cI].Z - netMTPc.Z + toProcessMTP[cI].Z - remainingToFlowc.Z;
-                    tKe[sI] += (outMTP[cI].Y - netMTPc.Y + toProcessMTP[cI].Y - remainingToFlowc.Y);
-
-
-                    //this is w.flowOut()
                     if (coreM[wI] > 0)
                     {
-                        psionsReleasedw = psionLevel[wI] / coreM[wI] * netMTPw.X;
+                        psionsReleasedw = psionLevel[wI] / coreM[wI] * outMTP[wI].X * healthiness[wI];
                     }
-                    psionLevel[wI] -= psionsReleasedw;
-                    Vector3 remainingToFloww = toProcessMTP[wI] * healthiness[wI];
-                    outMTP[wI] += new Vector3(0, 0, psionsReleasedw);
-                    inMTP[sI] += netMTPw + remainingToFloww;
-                    stomachM += outMTP[wI].X - netMTPw.X + toProcessMTP[wI].X - remainingToFloww.X;    
-                    psionLevel[sI] += outMTP[wI].Z - netMTPw.Z + toProcessMTP[wI].Z - remainingToFloww.Z;
-                    tKe[sI] += (outMTP[wI].Y - netMTPw.Y + toProcessMTP[wI].Y - remainingToFloww.Y);
-
-
-                    //this is m.flowOut()
-                    if (coreM[mI] > 0)
-                    {
-                        psionsReleasedm = psionLevel[mI] / coreM[mI] * netMTPm.X;
-                    }
-                    psionLevel[mI] -= psionsReleasedm;
-                    Vector3 remainingToFlowm = toProcessMTP[mI] * healthiness[mI];
-                    outMTP[mI] += new Vector3(0, 0, psionsReleasedm);
-                    inMTP[sI] += netMTPm + remainingToFlowm;
-                    stomachM += outMTP[mI].X - netMTPm.X + toProcessMTP[mI].X - remainingToFlowm.X;     
-                    psionLevel[sI] += outMTP[mI].Z - netMTPm.Z + toProcessMTP[mI].Z - remainingToFlowm.Z;
-                    tKe[sI] += (outMTP[mI].Y - netMTPm.Y + toProcessMTP[mI].Y - remainingToFlowm.Y);
-
-
-                    //this is p.flowOut()
                     if (coreM[pI] > 0)
                     {
-                        psionsReleasedp = psionLevel[pI] / coreM[pI] * netMTPp.X;
+                        psionsReleasedp = psionLevel[pI] / coreM[pI] * outMTP[pI].X * healthiness[pI];
                     }
+                    if (coreM[mI] > 0)
+                    {
+                        psionsReleasedm = psionLevel[mI] / coreM[mI] * outMTP[mI].X * healthiness[mI];
+                    }
+                    psionLevel[vI] -= psionsReleasedv;
+                    psionLevel[bI] -= psionsReleasedb;
+                    psionLevel[cI] -= psionsReleasedc;
+                    psionLevel[wI] -= psionsReleasedw;
+                    psionLevel[mI] -= psionsReleasedm;
                     psionLevel[pI] -= psionsReleasedp;
-                    Vector3 remainingToFlowp = toProcessMTP[pI] * healthiness[pI];
-                    outMTP[pI] += new Vector3(0, 0, psionsReleasedp);
-                    inMTP[sI] += netMTPp + remainingToFlowp;
-                    stomachM += outMTP[pI].X - netMTPp.X + toProcessMTP[pI].X - remainingToFlowp.X;     
-                    psionLevel[sI] += outMTP[pI].Z - netMTPp.Z + toProcessMTP[pI].Z - remainingToFlowp.Z;
-                    tKe[sI] += (outMTP[pI].Y - netMTPp.Y + toProcessMTP[pI].Y - remainingToFlowp.Y);
+                    psionLevel[sI] -= psionsReleaseds;
 
+                    outMTP[vI] += new Vector3(0, 0, psionsReleasedv);
+                    outMTP[bI] += new Vector3(0, 0, psionsReleasedb);
+                    outMTP[cI] += new Vector3(0, 0, psionsReleasedc);
+                    outMTP[wI] += new Vector3(0, 0, psionsReleasedw);
+                    outMTP[mI] += new Vector3(0, 0, psionsReleasedm);
+                    outMTP[pI] += new Vector3(0, 0, psionsReleasedp);
+                    outMTP[sI] += new Vector3(0, 0, psionsReleaseds) + toProcessMTP[sI];
+
+                    inMTP[sI] += (outMTP[vI] + toProcessMTP[vI]) * healthiness[vI];
+                    inMTP[sI] += (outMTP[bI] + toProcessMTP[bI]) * healthiness[bI];
+                    inMTP[sI] += (outMTP[cI] + toProcessMTP[cI]) * healthiness[cI];
+                    inMTP[sI] += (outMTP[wI] + toProcessMTP[wI]) * healthiness[wI];
+                    inMTP[sI] += (outMTP[mI] + toProcessMTP[mI]) * healthiness[mI];
+                    inMTP[sI] += (outMTP[pI] + toProcessMTP[pI]) * healthiness[pI];
+
+                    stomachM += (outMTP[vI].X + toProcessMTP[vI].X) * (1 - healthiness[vI]);
+                    stomachM += (outMTP[bI].X + toProcessMTP[bI].X) * (1 - healthiness[bI]);
+                    stomachM += (outMTP[cI].X + toProcessMTP[cI].X) * (1 - healthiness[cI]);
+                    stomachM += (outMTP[wI].X + toProcessMTP[wI].X) * (1 - healthiness[wI]);
+                    stomachM += (outMTP[mI].X + toProcessMTP[mI].X) * (1 - healthiness[mI]);
+                    stomachM += (outMTP[pI].X + toProcessMTP[pI].X) * (1 - healthiness[pI]);
+
+                    psionLevel[sI] += (outMTP[vI].Z + toProcessMTP[vI].Z) * (1 - healthiness[vI]);
+                    psionLevel[sI] += (outMTP[bI].Z + toProcessMTP[bI].Z) * (1 - healthiness[bI]);
+                    psionLevel[sI] += (outMTP[cI].Z + toProcessMTP[cI].Z) * (1 - healthiness[cI]);
+                    psionLevel[sI] += (outMTP[wI].Z + toProcessMTP[wI].Z) * (1 - healthiness[wI]);
+                    psionLevel[sI] += (outMTP[mI].Z + toProcessMTP[mI].Z) * (1 - healthiness[mI]);
+                    psionLevel[sI] += (outMTP[pI].Z + toProcessMTP[pI].Z) * (1 - healthiness[pI]);
+
+                    tKe[sI] += (outMTP[vI].Y + toProcessMTP[vI].Y) * (1 - healthiness[vI]);
+                    tKe[sI] += (outMTP[bI].Y + toProcessMTP[bI].Y) * (1 - healthiness[bI]);
+                    tKe[sI] += (outMTP[cI].Y + toProcessMTP[cI].Y) * (1 - healthiness[cI]);
+                    tKe[sI] += (outMTP[wI].Y + toProcessMTP[wI].Y) * (1 - healthiness[wI]);
+                    tKe[sI] += (outMTP[mI].Y + toProcessMTP[mI].Y) * (1 - healthiness[mI]);
+                    tKe[sI] += (outMTP[pI].Y + toProcessMTP[pI].Y) * (1 - healthiness[pI]);
 
                     //this is s.flowOut()
-                    float psionsReleaseds = psionLevel[sI] / coreM[sI] * outMTP[sI].X;
-                    psionLevel[sI] -= psionsReleaseds;
-                    outMTP[sI] += new Vector3(0, 0, psionsReleaseds) + toProcessMTP[sI];
                     inMTP[cI] = outMTP[sI] * cDP;
                     inMTP[wI] = outMTP[sI] * wDP;
                     inMTP[mI] = outMTP[sI] * mDP;
@@ -720,5 +685,8 @@ namespace OrganDesigner
         }
 
     }
+
+
+
 
 }

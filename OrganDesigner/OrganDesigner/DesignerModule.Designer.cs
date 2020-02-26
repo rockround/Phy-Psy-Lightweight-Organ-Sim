@@ -96,6 +96,14 @@
             this.SimRate = new System.Windows.Forms.NumericUpDown();
             this.SimRateLabel = new System.Windows.Forms.Label();
             this.HeartRate = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
+            this.MotorPsion = new System.Windows.Forms.ProgressBar();
+            this.VisionPsion = new System.Windows.Forms.ProgressBar();
+            this.PumpPsion = new System.Windows.Forms.ProgressBar();
+            this.CapacitorPsion = new System.Windows.Forms.ProgressBar();
+            this.WriterPsion = new System.Windows.Forms.ProgressBar();
+            this.BetaPsion = new System.Windows.Forms.ProgressBar();
+            this.StructurePsion = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.SimRate)).BeginInit();
             this.SuspendLayout();
             // 
@@ -597,7 +605,7 @@
             // 
             // CapacitorCharge
             // 
-            this.CapacitorCharge.Location = new System.Drawing.Point(981, 239);
+            this.CapacitorCharge.Location = new System.Drawing.Point(1108, 239);
             this.CapacitorCharge.Name = "CapacitorCharge";
             this.CapacitorCharge.Size = new System.Drawing.Size(100, 23);
             this.CapacitorCharge.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -605,7 +613,7 @@
             // 
             // WriterCharge
             // 
-            this.WriterCharge.Location = new System.Drawing.Point(981, 285);
+            this.WriterCharge.Location = new System.Drawing.Point(1108, 285);
             this.WriterCharge.Name = "WriterCharge";
             this.WriterCharge.Size = new System.Drawing.Size(100, 23);
             this.WriterCharge.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -613,7 +621,7 @@
             // 
             // MotorCharge
             // 
-            this.MotorCharge.Location = new System.Drawing.Point(981, 338);
+            this.MotorCharge.Location = new System.Drawing.Point(1108, 338);
             this.MotorCharge.Name = "MotorCharge";
             this.MotorCharge.Size = new System.Drawing.Size(100, 23);
             this.MotorCharge.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -622,7 +630,7 @@
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(1005, 138);
+            this.label24.Location = new System.Drawing.Point(1132, 138);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(41, 13);
             this.label24.TabIndex = 77;
@@ -695,11 +703,84 @@
             this.HeartRate.TabIndex = 82;
             this.HeartRate.Text = "0";
             // 
+            // label25
+            // 
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(1002, 138);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(59, 13);
+            this.label25.TabIndex = 90;
+            this.label25.Text = "PsionLevel";
+            // 
+            // MotorPsion
+            // 
+            this.MotorPsion.Location = new System.Drawing.Point(981, 338);
+            this.MotorPsion.Name = "MotorPsion";
+            this.MotorPsion.Size = new System.Drawing.Size(100, 23);
+            this.MotorPsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.MotorPsion.TabIndex = 89;
+            // 
+            // VisionPsion
+            // 
+            this.VisionPsion.Location = new System.Drawing.Point(981, 494);
+            this.VisionPsion.Name = "VisionPsion";
+            this.VisionPsion.Size = new System.Drawing.Size(100, 23);
+            this.VisionPsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.VisionPsion.TabIndex = 88;
+            // 
+            // PumpPsion
+            // 
+            this.PumpPsion.Location = new System.Drawing.Point(981, 441);
+            this.PumpPsion.Name = "PumpPsion";
+            this.PumpPsion.Size = new System.Drawing.Size(100, 23);
+            this.PumpPsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.PumpPsion.TabIndex = 87;
+            // 
+            // CapacitorPsion
+            // 
+            this.CapacitorPsion.Location = new System.Drawing.Point(981, 239);
+            this.CapacitorPsion.Name = "CapacitorPsion";
+            this.CapacitorPsion.Size = new System.Drawing.Size(100, 23);
+            this.CapacitorPsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.CapacitorPsion.TabIndex = 86;
+            // 
+            // WriterPsion
+            // 
+            this.WriterPsion.Location = new System.Drawing.Point(981, 285);
+            this.WriterPsion.Name = "WriterPsion";
+            this.WriterPsion.Size = new System.Drawing.Size(100, 23);
+            this.WriterPsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.WriterPsion.TabIndex = 85;
+            // 
+            // BetaPsion
+            // 
+            this.BetaPsion.Location = new System.Drawing.Point(981, 388);
+            this.BetaPsion.Name = "BetaPsion";
+            this.BetaPsion.Size = new System.Drawing.Size(100, 23);
+            this.BetaPsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.BetaPsion.TabIndex = 84;
+            // 
+            // StructurePsion
+            // 
+            this.StructurePsion.Location = new System.Drawing.Point(981, 200);
+            this.StructurePsion.Name = "StructurePsion";
+            this.StructurePsion.Size = new System.Drawing.Size(100, 23);
+            this.StructurePsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.StructurePsion.TabIndex = 83;
+            // 
             // DesignerModule
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1280, 710);
+            this.Controls.Add(this.label25);
+            this.Controls.Add(this.MotorPsion);
+            this.Controls.Add(this.VisionPsion);
+            this.Controls.Add(this.PumpPsion);
+            this.Controls.Add(this.CapacitorPsion);
+            this.Controls.Add(this.WriterPsion);
+            this.Controls.Add(this.BetaPsion);
+            this.Controls.Add(this.StructurePsion);
             this.Controls.Add(this.HeartRate);
             this.Controls.Add(this.SimRateLabel);
             this.Controls.Add(this.SimRate);
@@ -847,6 +928,14 @@
         private System.Windows.Forms.NumericUpDown SimRate;
         private System.Windows.Forms.Label SimRateLabel;
         private System.Windows.Forms.Label HeartRate;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.ProgressBar MotorPsion;
+        private System.Windows.Forms.ProgressBar VisionPsion;
+        private System.Windows.Forms.ProgressBar PumpPsion;
+        private System.Windows.Forms.ProgressBar CapacitorPsion;
+        private System.Windows.Forms.ProgressBar WriterPsion;
+        private System.Windows.Forms.ProgressBar BetaPsion;
+        private System.Windows.Forms.ProgressBar StructurePsion;
     }
 }
 

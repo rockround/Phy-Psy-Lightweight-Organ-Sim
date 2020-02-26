@@ -1,7 +1,6 @@
 C:\Users\Tomoishi Kimaru\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\StateMachineTester\bin\Debug\StateMachineTester.exe.config
 C:\Users\Tomoishi Kimaru\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\StateMachineTester\bin\Debug\StateMachineTester.exe
 C:\Users\Tomoishi Kimaru\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\StateMachineTester\bin\Debug\StateMachineTester.pdb
-C:\Users\Tomoishi Kimaru\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\StateMachineTester\obj\Debug\StateMachineTester.csprojAssemblyReference.cache
 C:\Users\Tomoishi Kimaru\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\StateMachineTester\obj\Debug\StateMachineTester.SimRate.resources
 C:\Users\Tomoishi Kimaru\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\StateMachineTester\obj\Debug\StateMachineTester.Properties.Resources.resources
 C:\Users\Tomoishi Kimaru\Documents\GitHub\Phy-Psy-Lightweight-Organ-Sim\OrganDesigner\StateMachineTester\obj\Debug\StateMachineTester.csproj.GenerateResource.cache

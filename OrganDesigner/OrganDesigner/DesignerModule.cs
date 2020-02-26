@@ -26,7 +26,7 @@ namespace OrganDesigner
         float baseBps = 1;
         float homeostasis = 1;
         ProgressBar[] cores, powers, temps, charges;
-        bool isFlat = false;
+        bool isFlat = true;
         public DesignerModule()
         {
             InitializeComponent();
