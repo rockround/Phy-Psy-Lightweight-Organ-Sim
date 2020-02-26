@@ -321,13 +321,8 @@ namespace OrganDesigner
 
             while (true)
             {
-
-
                 float time = 0;
                 curBps = bps;
-
-
-
 
                 //this is s.flowIn()
                 toProcessMTP[sI] = inMTP[sI];
@@ -368,19 +363,17 @@ namespace OrganDesigner
 
                         //this is s.continuousIn
                         usedQ[sI] = Math.Min(pC[sI] / healthiness[sI], inQ[sI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
-                        float netQs = usedQ[sI] * healthiness[sI];//usable energy
-                        tKe[sI] += (usedQ[sI] - netQs);//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
+                        tKe[sI] += (usedQ[sI] - (usedQ[sI] * healthiness[sI]));//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
                         outQ[sI] = inQ[sI] - usedQ[sI];//amount of energy left over
-                        currentPower[sI] = netQs / pC[sI];
+                        currentPower[sI] = (usedQ[sI] * healthiness[sI]) / pC[sI];
                         inQ[sI] = 0;
 
 
                         //this is v.continuousIn
                         usedQ[vI] = Math.Min(pC[vI] / healthiness[vI], inQ[vI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
-                        float netQv = usedQ[vI] * healthiness[vI];//usable energy
-                        tKe[vI] += (usedQ[vI] - netQv);//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
+                        tKe[vI] += (usedQ[vI] - (usedQ[vI] * healthiness[vI]));//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
                         outQ[vI] = inQ[vI] - usedQ[vI];//amount of energy left over
-                        currentPower[vI] = netQv / pC[vI];
+                        currentPower[vI] = (usedQ[vI] * healthiness[vI]) / pC[vI];
                         inQ[vI] = 0;
 
                         //b.continuousIn() does nothing
@@ -414,10 +407,9 @@ namespace OrganDesigner
 
                         //this is p.continuousIn
                         usedQ[pI] = Math.Min(pC[pI] / healthiness[pI], inQ[pI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
-                        float netQp = usedQ[pI] * healthiness[pI];//usable energy
-                        tKe[pI] += (usedQ[pI] - netQp);//ohmic heating (using power because the operall result would be described as the sum, or in calculus the integral.
+                        tKe[pI] += (usedQ[pI] - (usedQ[pI] * healthiness[pI]));//ohmic heating (using power because the operall result would be described as the sum, or in calculus the integral.
                         outQ[pI] = inQ[pI] - usedQ[pI];//amount of energy left oper
-                        currentPower[pI] = netQp / pC[pI];
+                        currentPower[pI] = (usedQ[pI] * healthiness[pI]) / pC[pI];
                         inQ[pI] = 0;
 
 
@@ -432,12 +424,10 @@ namespace OrganDesigner
                             float finalTemp = (tKe[vI] + deltaMTPv.Y) / (coreM[vI] + dynamicM[vI] + deltaMTPv.X);
                             toProcessMTP[vI] -= deltaMTPv;
                             deltaMTPv = new Vector3(deltaMTPv.X, 0, 0);
-                            float availableM = deltaMTPv.X;
-                            float usedM = Math.Min(availableM, startHealth[vI] - (coreM[vI] + dynamicM[vI]));//if health below normal, get minimum of health needed, available matter, and regeneration
+                            float usedM = Math.Min(deltaMTPv.X, startHealth[vI] - (coreM[vI] + dynamicM[vI]));//if health below normal, get minimum of health needed, available matter, and regeneration
                             dynamicM[vI] += usedM;
                             tKe[vI] = finalTemp * (coreM[vI] + dynamicM[vI]);
-                            Vector3 incorporated = deltaMTPv * usedM / availableM;
-                            deltaMTPv -= incorporated;
+                            deltaMTPv -= deltaMTPv * usedM / deltaMTPv.X;
                             deltaMTPv.Y = deltaMTPv.X * finalTemp;
                         }
                         healthiness[vI] = (dynamicM[vI] + coreM[vI]) / startHealth[vI];
@@ -462,8 +452,7 @@ namespace OrganDesigner
                             float usedM = Math.Min(deltaMTPb.X, startHealth[bI] - (coreM[bI] + dynamicM[bI]));//if health below normal, get minimum of health needed, abailable matter, and regeneration
                             dynamicM[bI] += usedM;
                             tKe[bI] = finalTempB * (coreM[bI] + dynamicM[bI]);
-                            Vector3 incorporated = deltaMTPb * usedM / deltaMTPb.X;
-                            deltaMTPb -= incorporated;
+                            deltaMTPb -= deltaMTPb * usedM / deltaMTPb.X;
                             deltaMTPb.Y = deltaMTPb.X * finalTempB;
                         }
                         healthiness[bI] = (dynamicM[bI] + coreM[bI]) / startHealth[bI];
@@ -483,8 +472,7 @@ namespace OrganDesigner
                             float usedM = Math.Min(deltaMTPc.X, startHealth[cI] - (coreM[cI] + dynamicM[cI]));//if health below normal, get minimum of health needed, available matter, and regeneration
                             dynamicM[cI] += usedM;
                             tKe[cI] = finalTemp * (coreM[cI] + dynamicM[cI]);
-                            Vector3 incorporated = deltaMTPc * usedM / deltaMTPc.X;
-                            deltaMTPc -= incorporated;
+                            deltaMTPc -= deltaMTPc * usedM / deltaMTPc.X;
                             deltaMTPc.Y = deltaMTPc.X * finalTemp;
                         }
                         healthiness[cI] = (dynamicM[cI] + coreM[cI]) / startHealth[cI];
@@ -498,15 +486,14 @@ namespace OrganDesigner
                         if (minMw > 0)
                         {
                             deltaMTPw = minMw / toProcessMTP[wI].X * toProcessMTP[wI];
-                            psionLevel[wI] += deltaMTPw.Z;
+                            rawPsions = deltaMTPw.Z;
                             float finalTemp = (tKe[wI] + deltaMTPw.Y) / (coreM[wI] + dynamicM[wI] + deltaMTPw.X);
                             toProcessMTP[wI] -= deltaMTPw;
                             deltaMTPw = new Vector3(deltaMTPw.X, 0, 0);
                             float usedM = Math.Min(deltaMTPw.X, startHealth[wI] - (coreM[wI] + dynamicM[wI]));//if health below normal, get minimum of health needed, awailable matter, and regeneration
                             dynamicM[wI] += usedM;
                             tKe[wI] = finalTemp * (coreM[wI] + dynamicM[wI]);
-                            Vector3 incorporated = deltaMTPw * usedM / deltaMTPw.X;
-                            deltaMTPw -= incorporated;
+                            deltaMTPw -= deltaMTPw * usedM / deltaMTPw.X;
                             deltaMTPw.Y = deltaMTPw.X * finalTemp;
                         }
                         if (usePsions)
@@ -532,8 +519,7 @@ namespace OrganDesigner
                             float usedM = Math.Min(deltaMTPm.X, startHealth[mI] - (coreM[mI] + dynamicM[mI]));//if health below normal, get minimum of health needed, available matter, and regeneration
                             dynamicM[mI] += usedM;
                             tKe[mI] = finalTemp * (coreM[mI] + dynamicM[mI]);
-                            Vector3 incorporated = deltaMTPm * usedM / deltaMTPm.X;
-                            deltaMTPm -= incorporated;
+                            deltaMTPm -= deltaMTPm * usedM / deltaMTPm.X;
                             deltaMTPm.Y = deltaMTPm.X * finalTemp;
                         }
                         healthiness[mI] = (dynamicM[mI] + coreM[mI]) / startHealth[mI];
@@ -549,12 +535,10 @@ namespace OrganDesigner
                             float finalTemp = (tKe[pI] + deltaMTPp.Y) / (coreM[pI] + dynamicM[pI] + deltaMTPp.X);
                             toProcessMTP[pI] -= deltaMTPp;
                             deltaMTPp = new Vector3(deltaMTPp.X, 0, 0);
-                            float apailableM = deltaMTPp.X;
-                            float usedM = Math.Min(apailableM, startHealth[pI] - (coreM[pI] + dynamicM[pI]));//if health below normal, get minimum of health needed, apailable matter, and regeneration
+                            float usedM = Math.Min(deltaMTPp.X, startHealth[pI] - (coreM[pI] + dynamicM[pI]));//if health below normal, get minimum of health needed, apailable matter, and regeneration
                             dynamicM[pI] += usedM;
                             tKe[pI] = finalTemp * (coreM[pI] + dynamicM[pI]);
-                            Vector3 incorporated = deltaMTPp * usedM / apailableM;
-                            deltaMTPp -= incorporated;
+                            deltaMTPp -= deltaMTPp * usedM / deltaMTPp.X;
                             deltaMTPp.Y = deltaMTPp.X * finalTemp;
                         }
                         healthiness[pI] = (dynamicM[pI] + coreM[pI]) / startHealth[pI];
@@ -620,7 +604,18 @@ namespace OrganDesigner
 
                     //this is v.flowOut
                     Vector3 netMTPv = outMTP[vI] * healthiness[vI];
+                    Vector3 netMTPb = outMTP[bI] * healthiness[bI];
+                    Vector3 netMTPc = outMTP[cI] * healthiness[cI];
+                    Vector3 netMTPw = outMTP[wI] * healthiness[wI];
+                    Vector3 netMTPm = outMTP[mI] * healthiness[mI];
+                    Vector3 netMTPp = outMTP[pI] * healthiness[pI];
                     float psionsReleasedv = 0;
+                    float psionsReleasedb = 0;
+                    float psionsReleasedc = 0;
+                    float psionsReleasedw = 0;
+                    float psionsReleasedm = 0;
+                    float psionsReleasedp = 0;
+
                     if (coreM[vI] > 0)
                     {
                         psionsReleasedv = psionLevel[vI] / coreM[vI] * netMTPv.X;
@@ -635,8 +630,6 @@ namespace OrganDesigner
 
 
                     //this is b.flowOut
-                    Vector3 netMTPb = outMTP[bI] * healthiness[bI];
-                    float psionsReleasedb = 0;
                     if (coreM[bI] > 0)
                     {
                         psionsReleasedb = psionLevel[bI] / coreM[bI] * netMTPb.X;
@@ -652,8 +645,6 @@ namespace OrganDesigner
 
 
                     //this is c.flowOut
-                    Vector3 netMTPc = outMTP[cI] * healthiness[cI];
-                    float psionsReleasedc = 0;
                     if (coreM[cI] > 0)
                     {
                         psionsReleasedc = psionLevel[cI] / coreM[cI] * netMTPc.X;
@@ -668,8 +659,6 @@ namespace OrganDesigner
 
 
                     //this is w.flowOut()
-                    Vector3 netMTPw = outMTP[wI] * healthiness[wI];
-                    float psionsReleasedw = 0;
                     if (coreM[wI] > 0)
                     {
                         psionsReleasedw = psionLevel[wI] / coreM[wI] * netMTPw.X;
@@ -684,8 +673,6 @@ namespace OrganDesigner
 
 
                     //this is m.flowOut()
-                    Vector3 netMTPm = outMTP[mI] * healthiness[mI];
-                    float psionsReleasedm = 0;
                     if (coreM[mI] > 0)
                     {
                         psionsReleasedm = psionLevel[mI] / coreM[mI] * netMTPm.X;
@@ -700,8 +687,6 @@ namespace OrganDesigner
 
 
                     //this is p.flowOut()
-                    Vector3 netMTPp = outMTP[pI] * healthiness[pI];
-                    float psionsReleasedp = 0;
                     if (coreM[pI] > 0)
                     {
                         psionsReleasedp = psionLevel[pI] / coreM[pI] * netMTPp.X;

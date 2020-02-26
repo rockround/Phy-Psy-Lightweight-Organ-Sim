@@ -52,7 +52,6 @@ namespace OrganDesigner
                 {
                     Thread.Sleep(50);
                 }
-                Console.WriteLine(s.coreM[FlatOrganSystem.sI] + " " + s.dynamicM[FlatOrganSystem.sI]);
                 if (stop)
                     break;
                 MethodInvoker mi = delegate ()
@@ -87,6 +86,7 @@ namespace OrganDesigner
 
                 };
                 this.Invoke(mi);
+                Console.WriteLine(s.coreM[FlatOrganSystem.sI]);
                 Thread.Sleep((int)(number * 1000 * 1 / simRate));
 
                 //To keep stuff from jamming up
@@ -104,7 +104,7 @@ namespace OrganDesigner
                 {
                     Thread.Sleep(50);
                 }
-                Console.WriteLine(s.coreM + " " + s.dynamicM);
+                Console.WriteLine(s.coreM);
                 if (stop)
                     break;
                 MethodInvoker mi = delegate ()
