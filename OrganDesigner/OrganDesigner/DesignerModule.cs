@@ -25,8 +25,8 @@ namespace OrganDesigner
         float fatBreakdown = 1;
         float baseBps = 1;
         float homeostasis = 1;
-        ProgressBar[] cores, powers, temps, charges;
-        bool isFlat = true;
+        ProgressBar[] cores, powers, temps, charges, psions;
+        bool isFlat =true;
         public DesignerModule()
         {
             InitializeComponent();
@@ -39,6 +39,7 @@ namespace OrganDesigner
             temps = new ProgressBar[] { WriterTemp, CapacitorTemp, MotorTemp, StructureTemp, BetaTemp, PumpTemp, VisionTemp };
             powers = new ProgressBar[] { WriterPower, CapacitorPower, MotorPower, StructurePower, BetaPower, PumpPower, VisionPower };
             charges = new ProgressBar[] { WriterCharge, CapacitorCharge, MotorCharge };
+            psions = new ProgressBar[] { WriterPsion, CapacitorPsion, MotorPsion, StructurePsion, BetaPsion, PumpPsion, VisionPsion };
             //passing it a method to be run on the new thread.
         }
 
@@ -64,6 +65,7 @@ namespace OrganDesigner
                             cores[i].Value = (int)(100 * s.coreM[i] / s.startHealth[i]);
                             powers[i].Value = (int)(100 * s.currentPower[i]);
                             temps[i].Value = Math.Min(100, (int)(s.getTemperature(i)));
+                            psions[i].Value = Math.Min(100,(int)(s.psionLevel[i] / (s.coreM[i] * EnergyManager.psionPerKg)));
                             if (i <= Organ.lastChargeableOrgan)
                             {
                                 charges[i].Value = (int)(100 * s.charge[i] / s.maxCharge[i]);
@@ -74,6 +76,7 @@ namespace OrganDesigner
                             cores[i].Value = 0;
                             powers[i].Value = 0;
                             temps[i].Value = 0;
+                            psions[i].Value = 0;
                             if (i <= Organ.lastChargeableOrgan)
                             {
                                 charges[i].Value = 0;
@@ -157,6 +160,7 @@ namespace OrganDesigner
                 cores[i].Value = 0;
                 powers[i].Value = 0;
                 temps[i].Value = 0;
+                psions[i].Value = 0;
                 if (i <= Organ.lastChargeableOrgan)
                 {
                     charges[i].Value = 0;

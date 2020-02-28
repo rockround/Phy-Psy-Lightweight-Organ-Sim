@@ -104,6 +104,19 @@
             this.WriterPsion = new System.Windows.Forms.ProgressBar();
             this.BetaPsion = new System.Windows.Forms.ProgressBar();
             this.StructurePsion = new System.Windows.Forms.ProgressBar();
+            this.label26 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.label29 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
+            this.label32 = new System.Windows.Forms.Label();
+            this.label33 = new System.Windows.Forms.Label();
+            this.label34 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.label36 = new System.Windows.Forms.Label();
+            this.label37 = new System.Windows.Forms.Label();
+            this.label38 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.SimRate)).BeginInit();
             this.SuspendLayout();
             // 
@@ -768,11 +781,147 @@
             this.StructurePsion.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.StructurePsion.TabIndex = 83;
             // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(531, 18);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(56, 13);
+            this.label26.TabIndex = 91;
+            this.label26.Text = "HeartRate";
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(613, 18);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(68, 13);
+            this.label27.TabIndex = 93;
+            this.label27.Text = "Boost Height";
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(623, 41);
+            this.label28.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(13, 13);
+            this.label28.TabIndex = 92;
+            this.label28.Text = "0";
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(949, 18);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(90, 13);
+            this.label29.TabIndex = 95;
+            this.label29.Text = "Gun Charge Rate";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(959, 41);
+            this.label30.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(13, 13);
+            this.label30.TabIndex = 94;
+            this.label30.Text = "0";
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(715, 18);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(97, 13);
+            this.label31.TabIndex = 97;
+            this.label31.Text = "Boost Charge Rate";
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(725, 41);
+            this.label32.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(13, 13);
+            this.label32.TabIndex = 96;
+            this.label32.Text = "0";
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(825, 18);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(107, 13);
+            this.label33.TabIndex = 99;
+            this.label33.Text = "Jetpack Acceleration";
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(835, 41);
+            this.label34.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(13, 13);
+            this.label34.TabIndex = 98;
+            this.label34.Text = "0";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(531, 78);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(77, 13);
+            this.label35.TabIndex = 101;
+            this.label35.Text = "Resting Health";
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(541, 101);
+            this.label36.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(13, 13);
+            this.label36.TabIndex = 100;
+            this.label36.Text = "0";
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(623, 78);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(70, 13);
+            this.label37.TabIndex = 103;
+            this.label37.Text = "Heating Rate";
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(633, 101);
+            this.label38.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(13, 13);
+            this.label38.TabIndex = 102;
+            this.label38.Text = "0";
+            // 
             // DesignerModule
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1280, 710);
+            this.Controls.Add(this.label37);
+            this.Controls.Add(this.label38);
+            this.Controls.Add(this.label35);
+            this.Controls.Add(this.label36);
+            this.Controls.Add(this.label33);
+            this.Controls.Add(this.label34);
+            this.Controls.Add(this.label31);
+            this.Controls.Add(this.label32);
+            this.Controls.Add(this.label29);
+            this.Controls.Add(this.label30);
+            this.Controls.Add(this.label27);
+            this.Controls.Add(this.label28);
+            this.Controls.Add(this.label26);
             this.Controls.Add(this.label25);
             this.Controls.Add(this.MotorPsion);
             this.Controls.Add(this.VisionPsion);
@@ -936,6 +1085,19 @@
         private System.Windows.Forms.ProgressBar WriterPsion;
         private System.Windows.Forms.ProgressBar BetaPsion;
         private System.Windows.Forms.ProgressBar StructurePsion;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.Label label38;
     }
 }
 

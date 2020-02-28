@@ -94,112 +94,6 @@ namespace OrganDesigner
         }
 
 
-        public void absorb()
-        {
-            float minM = Math.Min(metabolism[sI], toProcessMTP[sI].X);
-            Vector3 deltaMTP = Vector3.Zero;
-            float rawPsions = 0;
-            float finalTemp = getTemperature(sI);
-            if (minM > 0)
-            {
-                deltaMTP = (minM / toProcessMTP[sI].X) * toProcessMTP[sI];
-                rawPsions = deltaMTP.Z;
-                finalTemp = (tKe[sI] + deltaMTP.Y) / (coreM[sI] + dynamicM[sI] + deltaMTP.X);
-                toProcessMTP[sI] -= deltaMTP;
-                deltaMTP = new Vector3(deltaMTP.X, 0, 0);
-            }
-            if (Math.Round(toProcessMTP[sI].X + outMTP[sI].X + deltaMTP.X, 3) < totalDemandP)//if blood flow is too low, add directly to output deposit from dynamicM[sI]
-            {
-                float delta = Math.Min(totalDemandP - (outMTP[sI].X + toProcessMTP[sI].X + deltaMTP.X), metabolism[sI]);//get minimum of deficit and what can be offered via metabolism[sI]
-                if (dynamicM[sI] > delta)//if enough dynamic, pull from dynamic
-                {
-                    dynamicM[sI] -= delta;
-                    deltaMTP.X += delta;
-                }
-                else
-                {
-                    if (coreM[sI] + dynamicM[sI] > delta)//starve
-                    {
-                        deltaMTP.X += delta;
-                        float deltaHealth = delta - dynamicM[sI];
-                        psionLevel[sI] += crystalPsions * deltaHealth / coreM[sI]; //add to body psions from crystal proportional to percent of matter lost
-                        crystalPsions *= 1 - deltaHealth / coreM[sI];// subtract percent of psions lost due to matter loss
-                        coreM[sI] -= deltaHealth;
-                        dynamicM[sI] = 0;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Death by Starvation");
-                    }
-                }
-            }
-            else//care about self after caring for other organs
-            {
-                if (coreM[sI] + dynamicM[sI] > startHealth[sI])//if more than enough total health, get fat using matter from deltaM.
-                {
-                    float delta = Math.Min(fatGrowth, (coreM[sI] + dynamicM[sI]) - startHealth[sI]);
-                    fatM += delta;//gain fat
-                    dynamicM[sI] -= delta;
-                }
-                else //if less  than enough total health, use deltaM
-                {
-                    float usedM = Math.Min(Math.Min(fatM, fatBreakdown), startHealth[sI] - (coreM[sI] + dynamicM[sI]));//if health below normal, get minimum of health needed, available matter, and regeneration
-                    dynamicM[sI] += usedM;
-                    fatM -= usedM;
-                }
-            }
-            if (Math.Round(toProcessMTP[sI].Z + outMTP[sI].Z, 3) < psionBloodHomeostasis * (outMTP[sI].X + deltaMTP.X + toProcessMTP[sI].X))//Is current concentration acceptable?
-            {//too low
-                float delta = psionBloodHomeostasis * (outMTP[sI].X + deltaMTP.X + toProcessMTP[sI].X) - (toProcessMTP[sI].Z + outMTP[sI].Z);
-                if (delta > rawPsions)
-                {
-                    if (psionLevel[sI] + rawPsions > delta)
-                    {
-                        psionLevel[sI] -= delta - rawPsions;
-                        outMTP[sI].Z += delta;
-                    }
-                    else if (psionLevel[sI] + crystalPsions + rawPsions > delta)
-                    {
-                        crystalPsions -= delta - rawPsions - psionLevel[sI];
-                        psionLevel[sI] = 0;
-                        outMTP[sI].Z += delta;
-                    }
-                    else
-                    {
-                        outMTP[sI].Z += crystalPsions + psionLevel[sI] + rawPsions;
-                        crystalPsions = 0;
-                        psionLevel[sI] = 0;
-                    }
-                    rawPsions = 0;
-                }
-                else
-                {
-                    outMTP[sI].Z += delta;
-                    rawPsions -= delta;
-                    crystalPsions += rawPsions;
-                }
-            }
-            float crystalCap = coreM[sI] * EnergyManager.psionPerKg;
-
-            if (crystalPsions < crystalCap)//if crystal not yet fill
-            {
-                float delta = Math.Min(rawPsions, crystalCap - crystalPsions);
-                crystalPsions += delta;
-                rawPsions -= delta;
-                psionLevel[sI] += rawPsions;
-                rawPsions = 0;
-            }
-            else
-            {
-                psionLevel[sI] += rawPsions;
-                rawPsions = 0;
-            }
-            tKe[sI] = finalTemp * (coreM[sI] + dynamicM[sI]);
-            deltaMTP.Y = deltaMTP.X * finalTemp;
-            outMTP[sI] += deltaMTP;
-            healthiness[sI] = (dynamicM[sI] + coreM[sI]) / startHealth[sI];
-
-        }
 
         public virtual void bruise(float core, float dynamic, int idx, bool chunk = false)
         {
@@ -352,33 +246,16 @@ namespace OrganDesigner
 
                         //this is s.continuousIn
                         usedQ[sI] = Math.Min(pC[sI] / healthiness[sI], inQ[sI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
-                        tKe[sI] += (usedQ[sI] - (usedQ[sI] * healthiness[sI]));//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
+                        usedQ[vI] = Math.Min(pC[vI] / healthiness[vI], inQ[vI]);
+                        usedQ[pI] = Math.Min(pC[pI] / healthiness[pI], inQ[pI]);
+
+                        tKe[sI] += (usedQ[sI] * (1 - healthiness[sI]));//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
+                        tKe[vI] += (usedQ[vI] * (1 - healthiness[vI]));
+                        tKe[pI] += (usedQ[pI] * (1 - healthiness[pI]));
+
                         outQ[sI] = inQ[sI] - usedQ[sI];//amount of energy left over
-                        currentPower[sI] = (usedQ[sI] * healthiness[sI]) / pC[sI];
-                        inQ[sI] = 0;
-
-
-                        //this is v.continuousIn
-                        usedQ[vI] = Math.Min(pC[vI] / healthiness[vI], inQ[vI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
-                        tKe[vI] += (usedQ[vI] - (usedQ[vI] * healthiness[vI]));//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
                         outQ[vI] = inQ[vI] - usedQ[vI];//amount of energy left over
-                        currentPower[vI] = (usedQ[vI] * healthiness[vI]) / pC[vI];
-                        inQ[vI] = 0;
-
-                        //b.continuousIn() does nothing
-
-                        //this is c.continuousIn
-                        charge[cI] += inQ[cI];
-                        charge[cI] = Math.Min(maxCharge[cI], charge[cI]);
-                        inQ[cI] = 0;
-
-                        //this is w.continuousIn()
                         outQ[wI] = inQ[wI] - usedQ[wI];
-                        currentPower[wI] = usedQ[wI] / pC[wI];
-                        inQ[wI] = 0;
-
-
-                        //this is m.continuousIn()
                         outQ[mI] = inQ[mI] - usedQ[mI];
                         if (outQ[mI] > 0)
                         {
@@ -390,22 +267,44 @@ namespace OrganDesigner
                                 usedQ[mI] += deltaQ;
                             }
                         }
-                        currentPower[mI] = usedQ[mI] / pC[mI];
-                        inQ[mI] = 0;
-
-
-                        //this is p.continuousIn
-                        usedQ[pI] = Math.Min(pC[pI] / healthiness[pI], inQ[pI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
-                        tKe[pI] += (usedQ[pI] - (usedQ[pI] * healthiness[pI]));//ohmic heating (using power because the operall result would be described as the sum, or in calculus the integral.
                         outQ[pI] = inQ[pI] - usedQ[pI];//amount of energy left oper
+
+                        currentPower[sI] = (usedQ[sI] * healthiness[sI]) / pC[sI];
+                        currentPower[vI] = (usedQ[vI] * healthiness[vI]) / pC[vI];
+                        currentPower[wI] = usedQ[wI] / pC[wI];
+                        currentPower[mI] = usedQ[mI] / pC[mI];
                         currentPower[pI] = (usedQ[pI] * healthiness[pI]) / pC[pI];
+
+                        charge[cI] += inQ[cI];
+                        charge[cI] = Math.Min(maxCharge[cI], charge[cI]);
+
+                        inQ[sI] = 0;
+                        inQ[vI] = 0;
+                        inQ[cI] = 0;
+                        inQ[wI] = 0;
+                        inQ[mI] = 0;
                         inQ[pI] = 0;
 
 
 
-                        //this is v.absorb()
                         float minMv = Math.Min(metabolism[vI], toProcessMTP[vI].X);
+                        float minMb = Math.Min(metabolism[bI], toProcessMTP[bI].X);
+                        float minMc = Math.Min(metabolism[cI], toProcessMTP[cI].X);
+                        float minMw = Math.Min(metabolism[wI], toProcessMTP[wI].X);
+                        float minMm = Math.Min(metabolism[mI], toProcessMTP[mI].X);
+                        float minMp = Math.Min(metabolism[pI], toProcessMTP[pI].X);
+                        float minMs = Math.Min(metabolism[sI], toProcessMTP[sI].X);
+
                         Vector3 deltaMTPv = Vector3.Zero;
+                        Vector3 deltaMTPb = Vector3.Zero;
+                        Vector3 deltaMTPc = Vector3.Zero;
+                        Vector3 deltaMTPw = Vector3.Zero;
+                        Vector3 deltaMTPm = Vector3.Zero;
+                        Vector3 deltaMTPp = Vector3.Zero;
+                        Vector3 deltaMTPs = Vector3.Zero;
+
+                        float finalTempB = getTemperature(bI);
+
                         if (minMv > 0)
                         {
                             deltaMTPv = minMv / toProcessMTP[vI].X * toProcessMTP[vI];
@@ -419,14 +318,6 @@ namespace OrganDesigner
                             deltaMTPv -= deltaMTPv * usedM / deltaMTPv.X;
                             deltaMTPv.Y = deltaMTPv.X * finalTemp;
                         }
-                        healthiness[vI] = (dynamicM[vI] + coreM[vI]) / startHealth[vI];
-                        outMTP[vI] += deltaMTPv;
-
-
-                        //this is b.absorb()
-                        float finalTempB = getTemperature(bI);
-                        float minMb = Math.Min(metabolism[bI], toProcessMTP[bI].X);
-                        Vector3 deltaMTPb = Vector3.Zero;
                         if (minMb > 0)
                         {
                             deltaMTPb = minMb / toProcessMTP[bI].X * toProcessMTP[bI];
@@ -444,13 +335,6 @@ namespace OrganDesigner
                             deltaMTPb -= deltaMTPb * usedM / deltaMTPb.X;
                             deltaMTPb.Y = deltaMTPb.X * finalTempB;
                         }
-                        healthiness[bI] = (dynamicM[bI] + coreM[bI]) / startHealth[bI];
-                        outMTP[bI] += deltaMTPb;
-
-
-                        //this is c.absorb()
-                        float minMc = Math.Min(metabolism[cI], toProcessMTP[cI].X);
-                        Vector3 deltaMTPc = Vector3.Zero;
                         if (minMc > 0)
                         {
                             deltaMTPc = minMc / toProcessMTP[cI].X * toProcessMTP[cI];
@@ -464,18 +348,10 @@ namespace OrganDesigner
                             deltaMTPc -= deltaMTPc * usedM / deltaMTPc.X;
                             deltaMTPc.Y = deltaMTPc.X * finalTemp;
                         }
-                        healthiness[cI] = (dynamicM[cI] + coreM[cI]) / startHealth[cI];
-                        outMTP[cI] += deltaMTPc;
-
-
-                        //this is w.absorb()
-                        float rawPsions = 0;
-                        float minMw = Math.Min(metabolism[wI], toProcessMTP[wI].X);
-                        Vector3 deltaMTPw = Vector3.Zero;
                         if (minMw > 0)
                         {
                             deltaMTPw = minMw / toProcessMTP[wI].X * toProcessMTP[wI];
-                            rawPsions = deltaMTPw.Z;
+                            float rawPsion = deltaMTPw.Z;
                             float finalTemp = (tKe[wI] + deltaMTPw.Y) / (coreM[wI] + dynamicM[wI] + deltaMTPw.X);
                             toProcessMTP[wI] -= deltaMTPw;
                             deltaMTPw = new Vector3(deltaMTPw.X, 0, 0);
@@ -484,20 +360,16 @@ namespace OrganDesigner
                             tKe[wI] = finalTemp * (coreM[wI] + dynamicM[wI]);
                             deltaMTPw -= deltaMTPw * usedM / deltaMTPw.X;
                             deltaMTPw.Y = deltaMTPw.X * finalTemp;
-                        }
-                        if (usePsions)
-                        {
-                            crystalPsionw += rawPsions;
-                            rawPsions = 0;
-                            usePsions = false;
-                        }
-                        healthiness[wI] = (dynamicM[wI] + coreM[wI]) / startHealth[wI];
-                        outMTP[wI] += deltaMTPw;
-                        psionLevel[vI] += rawPsions;
 
-                        //this is m.absorb()
-                        float minMm = Math.Min(metabolism[mI], toProcessMTP[mI].X);
-                        Vector3 deltaMTPm = Vector3.Zero;
+                            if (usePsions)
+                            {
+                                crystalPsionw += rawPsion;
+                                rawPsion = 0;
+                                usePsions = false;
+                            }
+                            psionLevel[vI] += rawPsion;
+
+                        }
                         if (minMm > 0)
                         {
                             deltaMTPm = minMm / toProcessMTP[mI].X * toProcessMTP[mI];
@@ -511,12 +383,6 @@ namespace OrganDesigner
                             deltaMTPm -= deltaMTPm * usedM / deltaMTPm.X;
                             deltaMTPm.Y = deltaMTPm.X * finalTemp;
                         }
-                        healthiness[mI] = (dynamicM[mI] + coreM[mI]) / startHealth[mI];
-                        outMTP[mI] += deltaMTPm;
-
-
-                        float minMp = Math.Min(metabolism[pI], toProcessMTP[pI].X);
-                        Vector3 deltaMTPp = Vector3.Zero;
                         if (minMp > 0)
                         {
                             deltaMTPp = minMp / toProcessMTP[pI].X * toProcessMTP[pI];
@@ -530,7 +396,6 @@ namespace OrganDesigner
                             deltaMTPp -= deltaMTPp * usedM / deltaMTPp.X;
                             deltaMTPp.Y = deltaMTPp.X * finalTemp;
                         }
-                        healthiness[pI] = (dynamicM[pI] + coreM[pI]) / startHealth[pI];
                         float toCpt = Math.Min(stomachM, drain) * currentPower[pI];
                         stomachM -= toCpt;
                         dynamicM[sI] += toCpt;
@@ -539,51 +404,149 @@ namespace OrganDesigner
                         psionLevel[pI] += realP * (1 - healthiness[pI]);
                         outMTP[pI] += deltaMTPp;
 
-                        absorb();
+                        healthiness[vI] = (dynamicM[vI] + coreM[vI]) / startHealth[vI];
+                        healthiness[bI] = (dynamicM[bI] + coreM[bI]) / startHealth[bI];
+                        healthiness[cI] = (dynamicM[cI] + coreM[cI]) / startHealth[cI];
+                        healthiness[wI] = (dynamicM[wI] + coreM[wI]) / startHealth[wI];
+                        healthiness[mI] = (dynamicM[mI] + coreM[mI]) / startHealth[mI];
+                        healthiness[pI] = (dynamicM[pI] + coreM[pI]) / startHealth[pI];
+
+                        outMTP[vI] += deltaMTPv;
+                        outMTP[bI] += deltaMTPb;
+                        outMTP[cI] += deltaMTPc;
+                        outMTP[wI] += deltaMTPw;
+                        outMTP[mI] += deltaMTPm;
 
 
+                        float rawPsions = 0;
+                        float finalTemps = getTemperature(sI);
+                        if (minMs > 0)
+                        {
+                            deltaMTPs = (minMs / toProcessMTP[sI].X) * toProcessMTP[sI];
+                            rawPsions = deltaMTPs.Z;
+                            finalTemps = (tKe[sI] + deltaMTPs.Y) / (coreM[sI] + dynamicM[sI] + deltaMTPs.X);
+                            toProcessMTP[sI] -= deltaMTPs;
+                            deltaMTPs = new Vector3(deltaMTPs.X, 0, 0);
+                        }
+                        if (Math.Round(toProcessMTP[sI].X + outMTP[sI].X + deltaMTPs.X, 3) < totalDemandP)//if blood flow is too low, add directly to output deposit from dynamicM[sI]
+                        {
+                            float delta = Math.Min(totalDemandP - (outMTP[sI].X + toProcessMTP[sI].X + deltaMTPs.X), metabolism[sI]);//get minimum of deficit and what can be offered via metabolism[sI]
+                            if (dynamicM[sI] > delta)//if enough dynamic, pull from dynamic
+                            {
+                                dynamicM[sI] -= delta;
+                                deltaMTPs.X += delta;
+                            }
+                            else
+                            {
+                                if (coreM[sI] + dynamicM[sI] > delta)//starve
+                                {
+                                    deltaMTPs.X += delta;
+                                    float deltaHealth = delta - dynamicM[sI];
+                                    psionLevel[sI] += crystalPsions * deltaHealth / coreM[sI]; //add to body psions from crystal proportional to percent of matter lost
+                                    crystalPsions *= 1 - deltaHealth / coreM[sI];// subtract percent of psions lost due to matter loss
+                                    coreM[sI] -= deltaHealth;
+                                    dynamicM[sI] = 0;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Death by Starvation");
+                                }
+                            }
+                        }
+                        else//care about self after caring for other organs
+                        {
+                            if (coreM[sI] + dynamicM[sI] > startHealth[sI])//if more than enough total health, get fat using matter from deltaM.
+                            {
+                                float delta = Math.Min(fatGrowth, (coreM[sI] + dynamicM[sI]) - startHealth[sI]);
+                                fatM += delta;//gain fat
+                                dynamicM[sI] -= delta;
+                            }
+                            else //if less  than enough total health, use deltaM
+                            {
+                                float usedM = Math.Min(Math.Min(fatM, fatBreakdown), startHealth[sI] - (coreM[sI] + dynamicM[sI]));//if health below normal, get minimum of health needed, available matter, and regeneration
+                                dynamicM[sI] += usedM;
+                                fatM -= usedM;
+                            }
+                        }
+                        if (Math.Round(toProcessMTP[sI].Z + outMTP[sI].Z, 3) < psionBloodHomeostasis * (outMTP[sI].X + deltaMTPs.X + toProcessMTP[sI].X))//Is current concentration acceptable?
+                        {//too low
+                            float delta = psionBloodHomeostasis * (outMTP[sI].X + deltaMTPs.X + toProcessMTP[sI].X) - (toProcessMTP[sI].Z + outMTP[sI].Z);
+                            if (delta > rawPsions)
+                            {
+                                if (psionLevel[sI] + rawPsions > delta)
+                                {
+                                    psionLevel[sI] -= delta - rawPsions;
+                                    outMTP[sI].Z += delta;
+                                }
+                                else if (psionLevel[sI] + crystalPsions + rawPsions > delta)
+                                {
+                                    crystalPsions -= delta - rawPsions - psionLevel[sI];
+                                    psionLevel[sI] = 0;
+                                    outMTP[sI].Z += delta;
+                                }
+                                else
+                                {
+                                    outMTP[sI].Z += crystalPsions + psionLevel[sI] + rawPsions;
+                                    crystalPsions = 0;
+                                    psionLevel[sI] = 0;
+                                }
+                                rawPsions = 0;
+                            }
+                            else
+                            {
+                                outMTP[sI].Z += delta;
+                                rawPsions -= delta;
+                                crystalPsions += rawPsions;
+                            }
+                        }
+                        float crystalCap = coreM[sI] * EnergyManager.psionPerKg;
+
+                        if (crystalPsions < crystalCap)//if crystal not yet fill
+                        {
+                            float delta = Math.Min(rawPsions, crystalCap - crystalPsions);
+                            crystalPsions += delta;
+                            rawPsions -= delta;
+                            psionLevel[sI] += rawPsions;
+                            rawPsions = 0;
+                        }
+                        else
+                        {
+                            psionLevel[sI] += rawPsions;
+                            rawPsions = 0;
+                        }
+                        tKe[sI] = finalTemps * (coreM[sI] + dynamicM[sI]);
+                        deltaMTPs.Y = deltaMTPs.X * finalTemps;
+                        outMTP[sI] += deltaMTPs;
+                        healthiness[sI] = (dynamicM[sI] + coreM[sI]) / startHealth[sI];
 
 
-                        //this is v.continuousOut
                         inQ[cI] += outQ[vI];
+                        inQ[cI] += beta * healthiness[bI];
+                        inQ[cI] += outQ[wI];
+                        inQ[cI] += outQ[mI];
+                        inQ[cI] += outQ[pI];
+                        inQ[cI] += outQ[sI];
+
                         usedQ[vI] = 0;
+                        usedQ[wI] = 0;
+                        usedQ[mI] = 0;
+                        usedQ[pI] = 0;
+                        usedQ[sI] = 0;
 
+                        bodyCharge += -beta * (1 - healthiness[bI]);//leak charge into body
 
-                        //this is b.continuousOut()
-                        float realFlow = beta;
-                        bodyCharge += -realFlow * (1 - healthiness[bI]);//leak charge into body
-                        inQ[cI] += realFlow * healthiness[bI];
-
-                        //this is c.continuousOut
                         float rawQ = Math.Min(totalDemandE / healthiness[cI], charge[cI]);//Take as much eneryg as needed (taking into account heating)
                         charge[cI] -= rawQ;
                         float netQ = rawQ * healthiness[cI];
                         outQ[cI] = netQ;
                         if (coreM[cI] + dynamicM[cI] > 0)
                             tKe[cI] += rawQ - netQ;//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
+
                         inQ[wI] = netQ * wDE;
                         inQ[mI] = netQ * mDE;
                         inQ[vI] = netQ * vDE;
                         inQ[pI] = netQ * pDE;
                         inQ[sI] = netQ * sDE;
-
-
-                        //this is w.continuousOut
-                        inQ[cI] += outQ[wI];
-                        usedQ[wI] = 0;
-
-
-                        //this is m.continuousOut
-                        inQ[cI] += outQ[mI];
-                        usedQ[mI] = 0;
-
-                        //this is p.continuousOut
-                        inQ[cI] += outQ[pI];
-                        usedQ[pI] = 0;
-
-                        //this is s.continuousOut
-                        inQ[cI] += outQ[sI];
-                        usedQ[sI] = 0;
 
 
                         time += 0.05f;
