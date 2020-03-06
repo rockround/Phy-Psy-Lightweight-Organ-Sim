@@ -382,46 +382,6 @@ namespace OrganDesigner
                         outQ[vI] = inQ[vI] - usedQ[vI];//amount of energy left over
                         currentPower[vI] = netQv / pC[vI];
                         inQ[vI] = 0;
-
-                        //b.continuousIn() does nothing
-
-                        //this is c.continuousIn
-                        charge[cI] += inQ[cI];
-                        charge[cI] = Math.Min(maxCharge[cI], charge[cI]);
-                        inQ[cI] = 0;
-
-                        //this is w.continuousIn()
-                        outQ[wI] = inQ[wI] - usedQ[wI];
-                        currentPower[wI] = usedQ[wI] / pC[wI];
-                        inQ[wI] = 0;
-
-
-                        //this is m.continuousIn()
-                        outQ[mI] = inQ[mI] - usedQ[mI];
-                        if (outQ[mI] > 0)
-                        {
-                            if (charge[mI] < maxCharge[mI])
-                            {
-                                float deltaQ = Math.Min(maxCharge[mI] - charge[mI], outQ[mI]);
-                                outQ[mI] -= deltaQ;
-                                charge[mI] += deltaQ;
-                                usedQ[mI] += deltaQ;
-                            }
-                        }
-                        currentPower[mI] = usedQ[mI] / pC[mI];
-                        inQ[mI] = 0;
-
-
-                        //this is p.continuousIn
-                        usedQ[pI] = Math.Min(pC[pI] / healthiness[pI], inQ[pI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
-                        float netQp = usedQ[pI] * healthiness[pI];//usable energy
-                        tKe[pI] += (usedQ[pI] - netQp);//ohmic heating (using power because the operall result would be described as the sum, or in calculus the integral.
-                        outQ[pI] = inQ[pI] - usedQ[pI];//amount of energy left oper
-                        currentPower[pI] = netQp / pC[pI];
-                        inQ[pI] = 0;
-
-
-
                         //this is v.absorb()
                         float minMv = Math.Min(metabolism[vI], toProcessMTP[vI].X);
                         Vector3 deltaMTPv = Vector3.Zero;
@@ -443,7 +403,7 @@ namespace OrganDesigner
                         healthiness[vI] = (dynamicM[vI] + coreM[vI]) / startHealth[vI];
                         outMTP[vI] += deltaMTPv;
 
-
+                        //b.continuousIn() does nothing
                         //this is b.absorb()
                         float finalTempB = getTemperature(bI);
                         float minMb = Math.Min(metabolism[bI], toProcessMTP[bI].X);
@@ -469,27 +429,15 @@ namespace OrganDesigner
                         healthiness[bI] = (dynamicM[bI] + coreM[bI]) / startHealth[bI];
                         outMTP[bI] += deltaMTPb;
 
+                        //this is c.continuousIn
+                        charge[cI] += inQ[cI];
+                        charge[cI] = Math.Min(maxCharge[cI], charge[cI]);
+                        inQ[cI] = 0;
 
-                        //this is c.absorb()
-                        float minMc = Math.Min(metabolism[cI], toProcessMTP[cI].X);
-                        Vector3 deltaMTPc = Vector3.Zero;
-                        if (minMc > 0)
-                        {
-                            deltaMTPc = minMc / toProcessMTP[cI].X * toProcessMTP[cI];
-                            psionLevel[cI] += deltaMTPc.Z;
-                            float finalTemp = (tKe[cI] + deltaMTPc.Y) / (coreM[cI] + dynamicM[cI] + deltaMTPc.X);
-                            toProcessMTP[cI] -= deltaMTPc;
-                            deltaMTPc = new Vector3(deltaMTPc.X, 0, 0);
-                            float usedM = Math.Min(deltaMTPc.X, startHealth[cI] - (coreM[cI] + dynamicM[cI]));//if health below normal, get minimum of health needed, available matter, and regeneration
-                            dynamicM[cI] += usedM;
-                            tKe[cI] = finalTemp * (coreM[cI] + dynamicM[cI]);
-                            Vector3 incorporated = deltaMTPc * usedM / deltaMTPc.X;
-                            deltaMTPc -= incorporated;
-                            deltaMTPc.Y = deltaMTPc.X * finalTemp;
-                        }
-                        healthiness[cI] = (dynamicM[cI] + coreM[cI]) / startHealth[cI];
-                        outMTP[cI] += deltaMTPc;
-
+                        //this is w.continuousIn()
+                        outQ[wI] = inQ[wI] - usedQ[wI];
+                        currentPower[wI] = usedQ[wI] / pC[wI];
+                        inQ[wI] = 0;
 
                         //this is w.absorb()
                         float rawPsions = 0;
@@ -517,8 +465,24 @@ namespace OrganDesigner
                         }
                         healthiness[wI] = (dynamicM[wI] + coreM[wI]) / startHealth[wI];
                         outMTP[wI] += deltaMTPw;
-                        psionLevel[vI] += rawPsions;
+                        psionLevel[wI] += rawPsions;
 
+
+
+                        //this is m.continuousIn()
+                        outQ[mI] = inQ[mI] - usedQ[mI];
+                        if (outQ[mI] > 0)
+                        {
+                            if (charge[mI] < maxCharge[mI])
+                            {
+                                float deltaQ = Math.Min(maxCharge[mI] - charge[mI], outQ[mI]);
+                                outQ[mI] -= deltaQ;
+                                charge[mI] += deltaQ;
+                                usedQ[mI] += deltaQ;
+                            }
+                        }
+                        currentPower[mI] = usedQ[mI] / pC[mI];
+                        inQ[mI] = 0;
                         //this is m.absorb()
                         float minMm = Math.Min(metabolism[mI], toProcessMTP[mI].X);
                         Vector3 deltaMTPm = Vector3.Zero;
@@ -538,6 +502,46 @@ namespace OrganDesigner
                         }
                         healthiness[mI] = (dynamicM[mI] + coreM[mI]) / startHealth[mI];
                         outMTP[mI] += deltaMTPm;
+
+
+
+                        //this is p.continuousIn
+                        usedQ[pI] = Math.Min(pC[pI] / healthiness[pI], inQ[pI]);//get max of inQ and power necessary to meet powerconsumption demand after heating
+                        float netQp = usedQ[pI] * healthiness[pI];//usable energy
+                        tKe[pI] += (usedQ[pI] - netQp);//ohmic heating (using power because the operall result would be described as the sum, or in calculus the integral.
+                        outQ[pI] = inQ[pI] - usedQ[pI];//amount of energy left oper
+                        currentPower[pI] = netQp / pC[pI];
+                        inQ[pI] = 0;
+
+
+
+
+
+
+
+                        //this is c.absorb()
+                        float minMc = Math.Min(metabolism[cI], toProcessMTP[cI].X);
+                        Vector3 deltaMTPc = Vector3.Zero;
+                        if (minMc > 0)
+                        {
+                            deltaMTPc = minMc / toProcessMTP[cI].X * toProcessMTP[cI];
+                            psionLevel[cI] += deltaMTPc.Z;
+                            float finalTemp = (tKe[cI] + deltaMTPc.Y) / (coreM[cI] + dynamicM[cI] + deltaMTPc.X);
+                            toProcessMTP[cI] -= deltaMTPc;
+                            deltaMTPc = new Vector3(deltaMTPc.X, 0, 0);
+                            float usedM = Math.Min(deltaMTPc.X, startHealth[cI] - (coreM[cI] + dynamicM[cI]));//if health below normal, get minimum of health needed, available matter, and regeneration
+                            dynamicM[cI] += usedM;
+                            tKe[cI] = finalTemp * (coreM[cI] + dynamicM[cI]);
+                            Vector3 incorporated = deltaMTPc * usedM / deltaMTPc.X;
+                            deltaMTPc -= incorporated;
+                            deltaMTPc.Y = deltaMTPc.X * finalTemp;
+                        }
+                        healthiness[cI] = (dynamicM[cI] + coreM[cI]) / startHealth[cI];
+                        outMTP[cI] += deltaMTPc;
+
+
+
+
 
 
                         float minMp = Math.Min(metabolism[pI], toProcessMTP[pI].X);
@@ -598,16 +602,12 @@ namespace OrganDesigner
                         //this is w.continuousOut
                         inQ[cI] += outQ[wI];
                         usedQ[wI] = 0;
-
-
                         //this is m.continuousOut
                         inQ[cI] += outQ[mI];
                         usedQ[mI] = 0;
-
                         //this is p.continuousOut
                         inQ[cI] += outQ[pI];
                         usedQ[pI] = 0;
-
                         //this is s.continuousOut
                         inQ[cI] += outQ[sI];
                         usedQ[sI] = 0;
