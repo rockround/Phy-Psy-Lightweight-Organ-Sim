@@ -13,3 +13,6 @@ OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.pdb
 OrganDesigner/OrganDesigner/obj/Debug/OrganDesigner.exe
 OrganDesigner/.vs/OrganDesigner/v15/.suo
 OrganDesigner/.vs/OrganDesigner/v15/Server/sqlite3/storage.ide-wal
+*.ide-shm
+*.ide-shm
+*.ide-wal
