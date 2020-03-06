@@ -335,6 +335,7 @@ namespace OrganDesigner
                             deltaMTPb -= deltaMTPb * usedM / deltaMTPb.X;
                             deltaMTPb.Y = deltaMTPb.X * finalTempB;
                         }
+
                         if (minMc > 0)
                         {
                             deltaMTPc = minMc / toProcessMTP[cI].X * toProcessMTP[cI];
@@ -348,6 +349,7 @@ namespace OrganDesigner
                             deltaMTPc -= deltaMTPc * usedM / deltaMTPc.X;
                             deltaMTPc.Y = deltaMTPc.X * finalTemp;
                         }
+
                         if (minMw > 0)
                         {
                             deltaMTPw = minMw / toProcessMTP[wI].X * toProcessMTP[wI];
@@ -370,6 +372,7 @@ namespace OrganDesigner
                             psionLevel[vI] += rawPsion;
 
                         }
+
                         if (minMm > 0)
                         {
                             deltaMTPm = minMm / toProcessMTP[mI].X * toProcessMTP[mI];
@@ -383,6 +386,7 @@ namespace OrganDesigner
                             deltaMTPm -= deltaMTPm * usedM / deltaMTPm.X;
                             deltaMTPm.Y = deltaMTPm.X * finalTemp;
                         }
+
                         if (minMp > 0)
                         {
                             deltaMTPp = minMp / toProcessMTP[pI].X * toProcessMTP[pI];
