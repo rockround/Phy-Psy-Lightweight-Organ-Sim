@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -25,8 +27,19 @@ namespace OrganDesigner
         float fatBreakdown = 1;
         float baseBps = 1;
         float homeostasis = 1;
+
+        int startBoostIteration = 0;
+
+        //Set this to negative to turn off stabilization stopping
+        float stabilityCriteria = .000001f;
         ProgressBar[] cores, powers, temps, charges, psions;
         bool isFlat =true;
+
+        int iterationsSurvived = 0;
+
+        int deltaValCount = 100;
+        Queue<float> deltaVals;
+        float avgDeltaVals =0;
         public DesignerModule()
         {
             InitializeComponent();
@@ -40,6 +53,13 @@ namespace OrganDesigner
             powers = new ProgressBar[] { WriterPower, CapacitorPower, MotorPower, StructurePower, BetaPower, PumpPower, VisionPower };
             charges = new ProgressBar[] { WriterCharge, CapacitorCharge, MotorCharge };
             psions = new ProgressBar[] { WriterPsion, CapacitorPsion, MotorPsion, StructurePsion, BetaPsion, PumpPsion, VisionPsion };
+            deltaVals = new Queue<float>();
+
+            for (int i = 0; i < deltaValCount; i++)
+            {
+                deltaVals.Enqueue(100);
+            }
+            avgDeltaVals = 100;
             //passing it a method to be run on the new thread.
         }
 
@@ -55,6 +75,7 @@ namespace OrganDesigner
                 }
                 if (stop)
                     break;
+                float deltaBetweenIter = 0;
                 MethodInvoker mi = delegate ()
                 {
                     HeartRate.Text = s.curBps + "";
@@ -62,37 +83,87 @@ namespace OrganDesigner
                     {
                         if (s.coreM[i] + s.dynamicM[i] > 0)
                         {
-                            cores[i].Value = (int)(100 * s.coreM[i] / s.startHealth[i]);
-                            powers[i].Value = (int)(100 * s.currentPower[i]);
-                            temps[i].Value = Math.Min(100, (int)(s.getTemperature(i)));
-                            psions[i].Value = Math.Min(100,(int)(s.psionLevel[i] / (s.coreM[i] * EnergyManager.psionPerKg)));
+                           
+                            int newCore = (int)(100 * s.coreM[i] / s.startHealth[i]);
+                            int newPower = (int)(100 * s.currentPower[i]);
+                            int newTemps = Math.Min(100, (int)(s.getTemperature(i)));
+                            int newPsions = Math.Min(100,(int)(s.psionLevel[i] / (s.coreM[i] * EnergyManager.psionPerKg)));
+                            deltaBetweenIter += Math.Abs(cores[i].Value - newCore) + Math.Abs(powers[i].Value - newPower) + Math.Abs(temps[i].Value - newTemps) + Math.Abs(psions[i].Value - newPsions);
+                            cores[i].Value = newCore;
+                            powers[i].Value = newPower;
+                            temps[i].Value = newTemps;
+                            psions[i].Value = newPsions;
                             if (i <= Organ.lastChargeableOrgan)
                             {
-                                charges[i].Value = (int)(100 * s.charge[i] / s.maxCharge[i]);
+                                int newCharges = (int)(100 * s.charge[i] / s.maxCharge[i]);
+                                deltaBetweenIter += Math.Abs(charges[i].Value - newCharges);
+                                charges[i].Value = newCharges;
                             }
                         }
                         else
                         {
-                            cores[i].Value = 0;
-                            powers[i].Value = 0;
-                            temps[i].Value = 0;
-                            psions[i].Value = 0;
-                            if (i <= Organ.lastChargeableOrgan)
-                            {
-                                charges[i].Value = 0;
-                            }
-
+                            killMainLoop(null,null);
+                            LifeExpectancy.Text = iterationsSurvived * .05f + "";
+                            iterationsSurvived = 0;
+                            resetValues();
                         }
 
                     }
+                    avgDeltaVals = (avgDeltaVals * deltaValCount - deltaVals.Dequeue() + deltaBetweenIter) / deltaValCount;
+                    deltaVals.Enqueue(deltaBetweenIter);
+                    Delta.Text = avgDeltaVals + "";
 
+
+                    if (avgDeltaVals < stabilityCriteria)//If reached steady state
+                    {
+                        if (startBoostIteration == 0)
+                        {
+                            startBoostIteration = iterationsSurvived;
+                            Vector2 boostStats = s.getBoostVH();
+                            BoostHeating.Text = boostStats.Y + "";
+                            BoostHeight.Text = boostStats.X + "";
+                        }
+                        else
+                        {
+                            BoostChargeTime.Text = (iterationsSurvived - startBoostIteration) * .05f + "";
+                            startBoostIteration = 0;
+                            killMainLoop(null, null);
+                            LifeExpectancy.Text = "Infinity";
+                            RestingHealth.Text = s.coreM[Organ.StructureI] / s.startHealth[Organ.StructureI] + "";
+                        }
+                    }
 
                 };
+ 
                 this.Invoke(mi);
-                Console.WriteLine(s.coreM[FlatOrganSystem.sI]);
-                Thread.Sleep((int)(number * 1000 * 1 / simRate));
+                //Console.WriteLine(s.coreM[FlatOrganSystem.sI]);
+
+
+                if (number != 0)//skip sleeping if it returns 0 (end of discrete cycle)
+                {
+                    iterationsSurvived += 1;
+                    Thread.Sleep((int)(number * 1000 * 1 / simRate));
+                }
 
                 //To keep stuff from jamming up
+            }
+
+
+        }
+        void resetValues()
+        {
+            for (int i = 0; i < 7; i++)
+            {
+                cores[i].Value = 0;
+                powers[i].Value = 0;
+                temps[i].Value = 0;
+                psions[i].Value = 0;
+                if (i <= Organ.lastChargeableOrgan)
+                {
+                    charges[i].Value = 0;
+                }
+                RestingHealth.Text = 0 + "";
+                Delta.Text = 0 + "";
             }
 
         }
@@ -155,17 +226,8 @@ namespace OrganDesigner
             pause = false;
             stop = true;
             PauseButton.Enabled = PlayButton.Enabled = false;
-            for (int i = 0; i < 7; i++)
-            {
-                cores[i].Value = 0;
-                powers[i].Value = 0;
-                temps[i].Value = 0;
-                psions[i].Value = 0;
-                if (i <= Organ.lastChargeableOrgan)
-                {
-                    charges[i].Value = 0;
-                }
-            }
+            resetValues();
+            Terminate.Enabled = false;
         }
 
         private void startLoop(object sender, EventArgs e)
@@ -189,6 +251,7 @@ namespace OrganDesigner
             t.Start();
             PauseButton.Enabled = true;
             PlayButton.Enabled = false;
+            Terminate.Enabled = true;
         }
 
         private void PauseButton_Click(object sender, EventArgs e)
@@ -203,6 +266,40 @@ namespace OrganDesigner
             pause = false;
             PauseButton.Enabled = true;
             PlayButton.Enabled = false;
+        }
+        private void SaveOrganData(object sender, EventArgs e)
+        {
+            if (lastIdx == -1)
+                return;
+            int idx = OrganSelector.SelectedIndex;
+            startHealths[idx] = float.Parse(StartHealth.Text);
+            maxMs[idx] = float.Parse(MaxM.Text);
+            powerConsumptions[idx] = float.Parse(PowerConsumption.Text);
+            metabolisms[idx] = float.Parse(Metabolism.Text);
+
+            if (idx == Organ.MotorI || idx == Organ.WriterI || idx == Organ.CapacitorI)
+            {
+                maxCharges[idx] = int.Parse(MaxCharge.Text);
+            }
+            if (idx == Organ.StructureI)
+            {
+                fatBreakdown = float.Parse(FatBreakdown.Text);
+                fatGrowth = float.Parse(FatGrowth.Text);
+                homeostasis = float.Parse(Homeostasis.Text);
+                baseBps = float.Parse(BaseBps.Text);
+            }
+            if (idx == Organ.BetaI)
+            {
+                betaRate = float.Parse(BetaRate.Text);
+            }
+            if (idx == Organ.MotorI)
+            {
+                maxBoostCount = int.Parse(MaxBoostCount.Text);
+            }
+            if (idx == Organ.PumpI)
+            {
+                drainRate = float.Parse(DrainRate.Text);
+            }
         }
 
         private void OrganSelection(object sender, EventArgs e)

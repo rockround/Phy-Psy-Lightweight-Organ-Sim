@@ -647,13 +647,17 @@ namespace OrganDesigner
                     //Console.WriteLine(inMTP[sI] + " " + inMTP[bI] + " " + inMTP[pI]);
 
                 }
-                yield return .01f;
+                yield return 0;
             }
         }
-
+        internal Vector2 getBoostVH()
+        {
+            float chargePerBoost = maxCharge[Organ.MotorI] / maxBoostCount;
+            float netQ = chargePerBoost * healthiness[Organ.MotorI];
+            float boostHeating = (chargePerBoost - netQ);//ohmic heating (using power because the overall result would be described as the sum, or in calculus the integral.
+            charge[Organ.MotorI] -= chargePerBoost;
+            return new Vector2(netQ * EnergyManager.speedPerCharge,boostHeating);
+        }
     }
-
-
-
 
 }
